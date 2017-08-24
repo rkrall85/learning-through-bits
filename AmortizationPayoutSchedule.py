@@ -63,6 +63,8 @@ def amortize(principal, interest_rate, years, pmt, addl_principal, start_date, a
             start_date += relativedelta(months=1)
         elif frequency =='2ws':
             start_date += relativedelta(weeks=2)
+        elif frequency =='1ws':
+            start_date += relativedelta(weeks=1)
         else:#need to add more payment options such as quartley and weekly
             start_date += relativedelta(months=1)
         beg_balance = end_balance
@@ -127,6 +129,10 @@ def ScenariosVariables (frequency, years):
         freq            = '2ws'
         payments_per_year = 12*2
         #periods         = payments_per_year*years
+    elif frequency == 'weekly':
+            freq            = '1ws'
+            payments_per_year = 54
+            #periods         = payments_per_year*years
     else:
         freq            = 'AS' #year start freq
         payments_per_year = 12
@@ -141,9 +147,9 @@ start_date      = date(2016,1,1)
 '''
 Scenario 1: 15 year monthly payment with $50 extra princ payments.
 '''
-frequency       = 'monthly'
+frequency       = 'weekly'
 years           = 15
-addl_principal  = 50
+addl_principal  = 0
 ScenariosVariables(frequency,years)
 schedule1, stats1 = amortization_table(
                                         principal       = principal,
@@ -151,7 +157,7 @@ schedule1, stats1 = amortization_table(
                                         years           = years,
                                         addl_principal  = addl_principal,
                                         annual_payments = payments_per_year,
-                                        start_date      = date(2016,1,1),
+                                        start_date      = date(2018,6,1),
                                         frequency       = freq
                                         )
 #print(pd.DataFrame([stats1]))
@@ -160,7 +166,7 @@ Scenario 2: 30 year monthly payment with $50 extra princ payments.
 '''
 frequency       = 'bi-monthly'
 years           = 15
-addl_principal  = 50
+addl_principal  = 0
 ScenariosVariables(frequency,years)
 schedule2, stats2 = amortization_table(
                                         principal       = principal,
@@ -168,21 +174,41 @@ schedule2, stats2 = amortization_table(
                                         years           = years,
                                         addl_principal  = addl_principal,
                                         annual_payments = payments_per_year,
-                                        start_date      = date(2016,1,1),
+                                        start_date      = date(2018,6,1),
                                         frequency       = freq
                                         )
 
+frequency       = 'monthly'
+years           = 15
+addl_principal  = 0
+ScenariosVariables(frequency,years)
+schedule3, stats3 = amortization_table(
+                                        principal       = principal,
+                                        interest_rate   = interest_rate,
+                                        years           = years,
+                                        addl_principal  = addl_principal,
+                                        annual_payments = payments_per_year,
+                                        start_date      = date(2018,6,1),
+                                        frequency       = freq
+                                        )
 
-
-#print (schedule2)
-print(pd.DataFrame([stats1, stats2]))
+#print (schedule2.head())
+#print(pd.DataFrame([stats1, stats2]))
 
 #ScenariosVariables('bi-monthly',25)
 #print (freq,payments_per_year,periods)
 
+'''
+creating a graph
+'''
+plt.style.use('ggplot')
+fig, ax = plt.subplots(1, 1)
+schedule1.plot(x='Month', y='End Balance', label="15 year weekly w/o addlt payment", ax=ax)
+schedule2.plot(x='Month', y='End Balance', label="15 year bi-mothly w/o addlt payment", ax=ax)
+schedule3.plot(x='Month', y='End Balance', label="15 year mothly w/o addlt payment", ax=ax)
+plt.title("Pay Off Timelines");
 
-
-
+plt.show()
 
 #df, stats = amortization_table(700000, .04, 30, addl_principal=200, start_date=date(2016, 1,1))
 
