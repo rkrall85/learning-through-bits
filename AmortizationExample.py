@@ -103,8 +103,12 @@ df, stats = amortization_table(700000, .04, 30, addl_principal=200, start_date=d
 
 #print (df.tail())
 
-schedule1, stats1 = amortization_table(100000, .04, 30, addl_principal=50, start_date=date(2016,1,1))
-schedule2, stats2 = amortization_table(100000, .05, 30, addl_principal=200, start_date=date(2016,1,1))
-schedule3, stats3 = amortization_table(100000, .04, 15, addl_principal=0, start_date=date(2016,1,1))
+#schedule1, stats1 = amortization_table(100000, .04, 30, addl_principal=50, start_date=date(2016,1,1))
+#schedule2, stats2 = amortization_table(100000, .05, 30, addl_principal=200, start_date=date(2016,1,1))
+#schedule3, stats3 = amortization_table(100000, .04, 15, addl_principal=0, start_date=date(2016,1,1))
 
-print(pd.DataFrame([stats1, stats2, stats3]))
+
+schedule1, stats1 = amortization_table(250000, .03, 30, addl_principal=0, start_date=date(2017,8,25))
+print(pd.DataFrame([stats1]))
+
+#print(pd.DataFrame([stats1, stats2, stats3]))
