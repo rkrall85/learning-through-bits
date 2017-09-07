@@ -7,8 +7,14 @@ m = Basemap(projection='mill', llcrnrlat=-20, urcrnrlat=50,llcrnrlon=-130, urcrn
 m.drawcoastlines()
 m.drawcountries()
 m.drawstates()
-m.fillcontinents(color='#04BAE3', lake_color='#FFFFFE')
-m.drawmapboundary(fill_color = '#FFFFFE')
+m.fillcontinents(color='#04BAE3', lake_color='#FFFFFF')
+m.drawmapboundary(fill_color = '#FFFFFf')
 
-plt.title('first map')
+lat, lon = 29.67, -95.36
+x,y = m(lon, lat)
+m.plot(x,y,'r.')
+
+
+
+plt.title('Geo Plotting')
 plt.show()
