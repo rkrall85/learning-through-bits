@@ -1,10 +1,6 @@
-"""
-
-Basic Syntax
-Write a program that asks the user for a number (integer only) and prints the sum of its digits
 
 
-"""
+#Write a program that asks the user for a number (integer only) and prints the sum of its digits
 
 num1 = int(input ("Enter 1st number: "))
 num2 = int(input("Enter a 2nd number: "))
