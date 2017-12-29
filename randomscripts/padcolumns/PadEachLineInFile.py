@@ -11,5 +11,5 @@ with open('PadTest.txt')  as fileopen: lines = fileopen.read().splitlines()
 for x in lines:f2.write(x.ljust(99)+'\n')
 
 #closing files
-f.close()
+fileopen.close()
 f2.close()
