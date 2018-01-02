@@ -4,10 +4,10 @@ import pandas as pd
 import os
 os.chdir('C:\\Users\\rkrall\\github\\randomscripts\padmulticolumns')
 
-df = pd.read_csv('padmultitest.csv', delimiter='|')
+csv = pd.read_csv('padmultitest.csv', delimiter='|')
 df2 = open('padmultiout.txt', 'w')   # write mode
 
-tuples = [tuple(x) for x in df.values] #making a tuple of the data
+tuples = [tuple(x) for x in csv.values] #making a tuple of the data
 #dicts = df.to_dict().values #making a dictonary of the data
 
 for i in range(len(tuples)): #row loop
@@ -23,5 +23,4 @@ for i in range(len(tuples)): #row loop
         df2.write('|')
     df2.write('\n')
 
-#df.close()
 df2.close()
