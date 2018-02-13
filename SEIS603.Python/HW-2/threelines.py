@@ -32,18 +32,14 @@ alex.forward(200)
 
 #Creating all three lines via a loop.
 for i in range(4):
-    if i % 2 == 0: alex.left(90)
-    else: alex.right(90)
-    alex.forward(200)
+    if i % 2 == 0:  alex.left(90)
+    else:           alex.right(90)
+    alex.forward(200) #going north or south 200 steps
     alex.right(90)
     alex.penup()
-    #determining which lat and long line to "draw"
-    if i == 0: alex.forward(30)
-    elif i == 1: alex.forward(30)
-    elif i == 2: alex.forward(60)
-    else: alex.forward(60)
-    #route back to going north for last box
-    if i == 1: alex.right(180)
+    if i == 0   or i == 1:  alex.forward(30) #invisible lat/long line for box 1
+    elif i == 2 or i == 3:  alex.forward(60) #invisible lat/long line for box 2
+    if i == 1: alex.right(180) #route back to going north for box 2
     alex.pendown()
 
 alex.penup()
