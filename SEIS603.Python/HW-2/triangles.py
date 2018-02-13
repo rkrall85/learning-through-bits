@@ -16,7 +16,7 @@ for i in range(9):
     if i == 0: alex.left(60) #makes angle for left corner for big triangle
     elif i == 7: alex.right(60) #draws the line straight in the middle
     else: alex.right(120)
-    if i == 0 or i == 1 or i == 2: alex.forward(200) #lines for outside triangle
+    if i in [0,1,2]: alex.forward(200) #lines for outside triangle
     else: alex.forward(100) #lines for inside triangle
 
 wn.exitonclick()        #only exit on click

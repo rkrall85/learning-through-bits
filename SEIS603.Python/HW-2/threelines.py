@@ -37,8 +37,8 @@ for i in range(4):
     alex.forward(200) #going north or south 200 steps
     alex.right(90)
     alex.penup()
-    if i == 0   or i == 1:  alex.forward(30) #invisible lat/long line for box 1
-    elif i == 2 or i == 3:  alex.forward(60) #invisible lat/long line for box 2
+    if i in [0,1]:      alex.forward(30) #invisible lat/long line for box 1
+    elif i in [2,3]:    alex.forward(60) #invisible lat/long line for box 2
     if i == 1: alex.right(180) #route back to going north for box 2
     alex.pendown()
 
