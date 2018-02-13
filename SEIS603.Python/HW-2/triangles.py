@@ -19,6 +19,4 @@ for i in range(9):
     if i == 0 or i == 1 or i == 2: alex.forward(200) #lines for outside triangle
     else: alex.forward(100) #lines for inside triangle
 
-alex.penup()
-alex.setposition(0,0)
 wn.exitonclick()        #only exit on click
