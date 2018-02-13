@@ -1,5 +1,5 @@
 #Robert Krall
-#mileage.py
+#triangles.py
 
 
 import turtle #import turtles library
