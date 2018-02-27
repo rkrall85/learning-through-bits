@@ -31,3 +31,26 @@ Benefit of IDE:  debugging and syntax highlight
 IDE Stand for: Integrated Development Environment
 Difference between classes and instances:
 How many instances in python: Unlimited
+
+
+------------------------Week 4--------------------------
+#1. what is the difference between function definition and function invocation?
+    definition: what a function does; algo
+    invocation: calling a function
+    which must happen first? definition
+    how many times? as many as you want
+#2 why is a docstring not quite like a comment even though it serves the same purpose?
+    docstring is removed from compile
+    can view in ipython
+#3 give one reason why keyword based matching of parameters is better than position based matching of parameters?
+    sequence. remove confusion.
+
+------------------------Week 5--------------------------
+
+
+
+------------------------Week 6--------------------------
+
+
+
+------------------------Week 7--------------------------
