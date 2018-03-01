@@ -57,39 +57,4 @@ class User():
         #print('id', data.p_id)
 
 
-#def main():
-current_user = str(input("Are you a user(y/n)?"))
-if current_user.lower() == 'y':
-    user_name = str(input("Please enter your user name:"))
-    if user_name is None: user_name = 'robert.krall' #just for testing so I can dont have ot run script from terminal to get input.
-    user_profile = User(user_name)
-    #if user_profile.GetUser()[0] != 0:
-    print("Welcome back {}!".format(user_profile.GetUser()[1]))
-else:
-    print("Please answer the following questions to set up an account")
-    user_name   = input("User Name:")
-    first_name  = input("First Name:")
-    last_name   = input("Last Name:")
-    email       = input("email:")
-    user_profile = User(user_name,first_name,last_name, email)
-    if user_profile.CreateUser()[0] != 0:
-        print("You have successful created an account. Your user id is {}!".format(user_profile.GetUser()[0]))
-
-
-
-
 #print(username.GetUser()[0])#output user_id
-
-'''
-if username.GetUser() == 0:
-    Print("sorry no user")
-else:
-    print("found user")
-'''
-
-
-'''
-if user.CheckUser == 0:
-    #InsertPerson()
-    print(p_id)
-'''

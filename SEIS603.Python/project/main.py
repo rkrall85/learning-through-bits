@@ -1,33 +1,37 @@
 #main program to handle input from user.
 
-import db_connection as d
+import  db_connection as d,user_info as ui,stores as s
+
+
 
 connection = d.database_connection()
-
-current_user = input("Are you a current user?:")
+#def main():
+############Getting user profile information###################
+current_user = str(input("Are you a user(y/n)?"))
 if current_user.lower() == 'y':
-    user_name = input("Please enter your user name:")
-
-
-    SQLCommand = "SELECT p.p_id, p.f_name FROM dbo.Person AS p WHERE p.u_name = ?"
-    Values = [user_name.lower()]
-    connection.execute(SQLCommand,Values)
-    results = connection.fetchone()
-    print("hello " + results[1] + " (" + str(results[0]) + ")")
-
-
+    user_name = str(input("Please enter your user name:"))
+    user_profile = ui.User(user_name = 'robert.krall' )
+    #if user_profile.GetUser()[0] != 0:
+    print("Welcome back {}!".format(user_profile.GetUser()[1]))
 else:
     print("Please answer the following questions to set up an account")
+    user_name   = input("User Name:")
     first_name  = input("First Name:")
     last_name   = input("Last Name:")
-    user_name   = input("User Name:")
     email       = input("email:")
+    user_profile = ui.User(user_name,first_name,last_name, email)
+    if user_profile.CreateUser()[0] != 0:
+        print("You have successful created an account. Your user id is {}!".format(user_profile.GetUser()[0]))
+#######################################################
 
-    SQLCommand = ("INSERT INTO Person (f_name, l_name, u_name, email) "
-                                "VALUES (?,?,?,?)")
-    Values = [first_name,last_name,user_name.lower(),email]
+################Listing stores######################
+print("We currently support the following stores")
+lst_stores = s.GetStores()
+for i in (lst_stores):
+    print("{} - {}".format(i[0],i[1]))
 
-    connection.execute(SQLCommand,Values)
-    connection.commit()
 
-connection.close()
+s_id = int(input("Which store would you like to start with? (Please enter store id)"))
+store_name = s.GetStoreName(s_id)
+print("Let's get started with price tracking for an item at {}".format(store_name))
+#######################################################
