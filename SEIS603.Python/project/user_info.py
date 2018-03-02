@@ -1,10 +1,11 @@
 
-import db_connection as d
-crsr = d.database_connection()
+#import db_connection as d
+#crsr = d.database_connection()
 
 
 class User():
-    def __init__(self, user_name, first_name= None, last_name=None, email=None):
+    def __init__(self, db_connection,user_name, first_name= None, last_name=None, email=None):
+        self.db_connection = db_connection
         self.user_name = user_name
         self.first_name = first_name
         self.last_name = last_name
@@ -27,8 +28,8 @@ class User():
                 Select @user_id, @first_name, @last_name, @email, @message;
             """
         params = (self.user_name,) #creating parms
-        crsr.execute(sql, params) #executing sproc
-        data = crsr.fetchone() #putting results into row class
+        self.db_connection.execute(sql, params) #executing sproc
+        data = self.db_connection.fetchone() #putting results into row class
         user_id = data[0] #getting id
         first_name = data[1]
         last_name = data[2]
@@ -49,8 +50,8 @@ class User():
                 Select @user_id, @message;
             """
         params = (self.user_name,self.first_name, self.last_name, self.email,) #creating parms
-        crsr.execute(sql, params) #executing sproc
-        data = crsr.fetchone() #putting results into row class
+        self.db_connection.execute(sql, params) #executing sproc
+        data = self.db_connection.fetchone() #putting results into row class
         user_id = data[0] #getting id
         message = data[1]
         return user_id,message

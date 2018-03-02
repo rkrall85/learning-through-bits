@@ -11,11 +11,5 @@ ALTER TABLE [dbo].[User] ADD CONSTRAINT [PK_Person_pid] PRIMARY KEY CLUSTERED  (
 GO
 ALTER TABLE [dbo].[User] ADD CONSTRAINT [UIX_Person_pname] UNIQUE NONCLUSTERED  ([u_name]) ON [PRIMARY]
 GO
-GRANT SELECT ON  [dbo].[User] TO [python_dev]
-GO
-GRANT INSERT ON  [dbo].[User] TO [python_dev]
-GO
-GRANT UPDATE ON  [dbo].[User] TO [python_dev]
-GO
 EXEC sp_addextendedproperty N'MS_Description', N'naming sure all user names are unique', 'SCHEMA', N'dbo', 'TABLE', N'User', 'CONSTRAINT', N'UIX_Person_pname'
 GO

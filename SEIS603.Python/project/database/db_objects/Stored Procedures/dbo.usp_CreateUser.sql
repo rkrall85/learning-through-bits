@@ -29,23 +29,27 @@ BEGIN
 			AND @email IS NULL
 		)
 		SELECT @user_id = 0, @message ='You need to enter all fields'	
-   ELSE
-		INSERT INTO dbo.[User] (
-		                           f_name
-		                         , l_name
-		                         , u_name
-		                         , email
-		                       )
-		VALUES ( @first_name -- f_name - varchar(50)
-		       , @last_name -- l_name - varchar(50)
-		       , @user_name -- u_name - varchar(50)
-		       , @email -- email - varchar(200)
-		    )
-
-		SELECT @user_id = @@IDENTITY, @message = 'Success'
-
+	ELSE
+		IF NOT EXISTS (SELECT 1 FROM dbo.[User] WHERE [User].u_name= @user_name)
+			begin
+				INSERT INTO dbo.[User] (
+									f_name
+									, l_name
+									, u_name
+									, email
+								)
+				VALUES ( @first_name -- f_name - varchar(50)
+						, @last_name -- l_name - varchar(50)
+						, @user_name -- u_name - varchar(50)
+						, @email -- email - varchar(200)
+						)
+				
+				SELECT @user_id = @@IDENTITY, @message = 'Success'
+			END
+         ELSE
+			SELECT @user_id = u.u_id , @message = 'Success' 
+			FROM dbo.[User] AS u WHERE u.u_name= @user_name
+           
 		
 END
-GO
-GRANT EXECUTE ON  [dbo].[usp_CreateUser] TO [python_dev]
 GO

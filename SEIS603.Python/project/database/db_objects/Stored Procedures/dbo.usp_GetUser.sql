@@ -41,8 +41,5 @@ BEGIN
 				@message = 'Could not find user'
 		
 END
-GO
-GRANT VIEW DEFINITION ON  [dbo].[usp_GetUser] TO [python_dev]
-GO
-GRANT EXECUTE ON  [dbo].[usp_GetUser] TO [python_dev]
+
 GO

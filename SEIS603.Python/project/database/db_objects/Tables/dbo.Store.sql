@@ -4,3 +4,5 @@ CREATE TABLE [dbo].[Store]
 [s_name] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
 ) ON [PRIMARY]
 GO
+ALTER TABLE [dbo].[Store] ADD CONSTRAINT [PK_Store] PRIMARY KEY CLUSTERED  ([s_id]) ON [PRIMARY]
+GO
