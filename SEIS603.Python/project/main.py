@@ -46,27 +46,14 @@ def PriceTrackInput(db_connection):
 ############Getting user profile information###################
 
 current_user = str(input("Are you a user(y/n)?"))
-if current_user.lower() == 'y':
-    input_user_name = str(input("Please enter your user name:"))
-    user_profile = ui.User(db_connection,user_name = input_user_name)
-    user_id = user_profile.GetUser()[0]
-    user_name = user_profile.GetUser()[1]
-    #if user_profile.GetUser()[0] != 0:
-    print("Welcome back {}!".format(user_name))
-    #user_id = user_profile.GetUser()[0]
-else:
-    print("Please answer the following questions to set up an account")
-    user_name   = input("User Name:")
-    first_name  = input("First Name:")
-    last_name   = input("Last Name:")
-    email       = input("email:")
-    user_profile = ui.User(db_connection,user_name,first_name,last_name, email)
-    user_id = user_profile.CreateUser()[0]
-    if user_id != 0:
-        print("Your user id is {}!".format(user_id))
-        #user_id = user_profile.GetUser()[0]
-    else:
-        pass #for end program
+user_profile = ui.User(db_connection, current_user = current_user)
+user_id = user_profile.UserProfile()[0]
+first_name = user_profile.UserProfile()[1]
+print(user_id, first_name)
+
+#print(user_name)
+
+'''
 #######################################################
 price_track = input("Would you like to price track a new item?(y/n)")
 if price_track.lower() == 'y':
@@ -81,7 +68,7 @@ if price_track.lower() == 'y':
     new_item = it.Item(db_connection = db_connection,user_id = user_id, item_id = item_id, store_id = store_id,item_price = item_price, item_purschase_date = item_purschase_date, item_url = item_url)
     #new_item.CreateStoreItem() #create new store item #wont insert values for some reason
     new_item.TrackItem()[0]
-
+'''
 
 
 #ask about reporting

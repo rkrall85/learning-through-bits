@@ -2,17 +2,47 @@
 #import db_connection as d
 #crsr = d.database_connection()
 
+import sys
 
 class User():
-    def __init__(self, db_connection,user_name, first_name= None, last_name=None, email=None):
+    def __init__(self, db_connection,current_user):
         self.db_connection  = db_connection
-        self.user_name      = user_name
-        self.first_name     = first_name
-        self.last_name      = last_name
-        self.email          = email
+        self.current_user   = current_user
+
+
+    #will either look up for create a new one
+    def UserProfile(db_connection):
+        if self.current_user.lower() == 'y':
+            user_name = str(input("Please enter your user name:"))
+            if user_name.lower() == 'exit':
+                sys.exit()
+            else:
+                u_id    = self.GetUser(user_name)[0]
+                f_name  = self.GetUser(user_name)[1]
+                l_name  = self.GetUser(user_name)[2]
+                email   = self.GetUser(user_name)[3],
+                if u_id == 0:
+                    print("Your ID was not found. Please try again or enter exit")
+                    self.UserProfile()
+                else:
+                    print("Welcoem Back {}".format(f_name))
+                    return u_id, f_name, l_name, email
+        else:
+            print("Please answer the following questions to set up an new account")
+            user_name   = input("User Name:")
+            first_name  = input("First Name:")
+            last_name   = input("Last Name:")
+            email       = input("Email:")
+            u_id        = self.CreateUser(user_name,first_name,last_name,email)[0]
+            if u_id == 0:
+                print("Error happend. Please try again or enter exit")
+                self.UserProfile()
+            else:
+                print("Thank you for creating a profile {}".format(f_name))
+                return u_id, first_name, last_name, email
 
     #getting the user profile from database.
-    def GetUser(self):
+    def GetUser(self, u_name):
         sql =  """\
                 DECLARE	@user_id int,
 		                  @first_name varchar(50),
@@ -27,7 +57,7 @@ class User():
                                              @message = @message OUTPUT;
                 Select @user_id, @first_name, @last_name, @email, @message;
             """
-        params = (self.user_name,) #creating parms
+        params = (u_name,) #creating parms
         self.db_connection.execute(sql, params) #executing sproc
         data = self.db_connection.fetchone() #putting results into row class
         user_id = data[0] #getting id
@@ -39,7 +69,7 @@ class User():
         return user_id,first_name, last_name, email, message
         #message = data[1] #getting message
 
-    def CreateUser(self):
+    def CreateUser(self, u_name, f_name, l_name, email):
         sql = """\
                 DECLARE	@user_id int, @message varchar(50);
                 exec [dbo].[usp_CreateUser] @user_name = ?,
@@ -50,7 +80,7 @@ class User():
                                             @message = @message OUTPUT;
                 Select @user_id, @message;
             """
-        params = (self.user_name,self.first_name, self.last_name, self.email,) #creating parms
+        params = (u_name,f_name, l_name, email,) #creating parms
         self.db_connection.execute(sql, params) #executing sproc
         data = self.db_connection.fetchone() #putting results into row class
         user_id = data[0] #getting id
