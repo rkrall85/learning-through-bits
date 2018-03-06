@@ -3,7 +3,7 @@
 import datetime as dt
 
 import db_connection as d
-import user_info as ui
+import user_profile as up
 import stores as s
 import items as it
 
@@ -46,9 +46,13 @@ def PriceTrackInput(db_connection):
 ############Getting user profile information###################
 
 current_user = str(input("Are you a user(y/n)?"))
-user_profile = ui.User(db_connection, current_user = current_user)
-user_id = user_profile.UserProfile()[0]
-first_name = user_profile.UserProfile()[1]
+user = up.User(db_connection, current_user = current_user)
+user_profile = user.UserProfile()
+user_id = user_profile[0]
+first_name = user_profile[1]
+
+
+
 print(user_id, first_name)
 
 #print(user_name)

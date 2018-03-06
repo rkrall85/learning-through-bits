@@ -11,7 +11,7 @@ class User():
 
 
     #will either look up for create a new one
-    def UserProfile(db_connection):
+    def UserProfile(self):
         if self.current_user.lower() == 'y':
             user_name = str(input("Please enter your user name:"))
             if user_name.lower() == 'exit':
@@ -23,9 +23,9 @@ class User():
                 email   = self.GetUser(user_name)[3],
                 if u_id == 0:
                     print("Your ID was not found. Please try again or enter exit")
-                    self.UserProfile()
+                    self.UserProfile('y')
                 else:
-                    print("Welcoem Back {}".format(f_name))
+                    print("Welcome Back {}".format(f_name))
                     return u_id, f_name, l_name, email
         else:
             print("Please answer the following questions to set up an new account")
