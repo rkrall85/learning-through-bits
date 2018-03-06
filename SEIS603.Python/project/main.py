@@ -10,9 +10,6 @@ import items as it
 
 db_connection = d.database_connection()
 
-
-
-
 def PriceTrackInput(db_connection):
     print("We currently support the following stores")
     lst_stores = s.GetStores(db_connection)
@@ -45,18 +42,18 @@ def PriceTrackInput(db_connection):
 
     return i_id, s_id,i_price, i_date, i_url
 
-
-
 #def main():
 ############Getting user profile information###################
 
 current_user = str(input("Are you a user(y/n)?"))
 if current_user.lower() == 'y':
-    user_name = str(input("Please enter your user name:"))
-    user_profile = ui.User(db_connection,user_name = 'robert.krall' )
-    #if user_profile.GetUser()[0] != 0:
-    print("Welcome back {}!".format(user_profile.GetUser()[1]))
+    input_user_name = str(input("Please enter your user name:"))
+    user_profile = ui.User(db_connection,user_name = input_user_name)
     user_id = user_profile.GetUser()[0]
+    user_name = user_profile.GetUser()[1]
+    #if user_profile.GetUser()[0] != 0:
+    print("Welcome back {}!".format(user_name))
+    #user_id = user_profile.GetUser()[0]
 else:
     print("Please answer the following questions to set up an account")
     user_name   = input("User Name:")
@@ -64,22 +61,26 @@ else:
     last_name   = input("Last Name:")
     email       = input("email:")
     user_profile = ui.User(db_connection,user_name,first_name,last_name, email)
-    if user_profile.CreateUser()[0] != 0:
-        print("You have successful created an account. Your user id is {}!".format(user_profile.GetUser()[0]))
-        user_id = user_profile.GetUser()[0]
+    user_id = user_profile.CreateUser()[0]
+    if user_id != 0:
+        print("Your user id is {}!".format(user_id))
+        #user_id = user_profile.GetUser()[0]
+    else:
+        pass #for end program
 #######################################################
 price_track = input("Would you like to price track a new item?(y/n)")
 if price_track.lower() == 'y':
     #call price track py scirpt
-    price_input = PriceTrackInput(db_connection)
-    item_id = price_input[0]
-    store_id = price_input[1]
-    item_price = price_input[2]
-    item_purschase_date = price_input[3]
-    item_url = price_input[4]
-    track_item = it.TrackItem(db_connection,user_id,item_id,store_id, item_price, item_purschase_date, item_url)
-    #track_item.CreateStoreItem() #create new store item #wont insert values for some reason
-
+    track_input = PriceTrackInput(db_connection)
+    item_id = track_input[0]
+    store_id = track_input[1]
+    item_price = track_input[2]
+    item_purschase_date = track_input[3]
+    item_url = track_input[4]
+    #new_item = it.Item(db_connection,user_id,item_id,store_id, item_price, item_purschase_date, item_url)
+    new_item = it.Item(db_connection = db_connection,user_id = user_id, item_id = item_id, store_id = store_id,item_price = item_price, item_purschase_date = item_purschase_date, item_url = item_url)
+    #new_item.CreateStoreItem() #create new store item #wont insert values for some reason
+    new_item.TrackItem()[0]
 
 
 
@@ -87,4 +88,4 @@ if price_track.lower() == 'y':
 
 
 
-db_connection.close()
+#db_connection.close()

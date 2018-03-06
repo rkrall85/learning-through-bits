@@ -9,7 +9,7 @@ def database_connection():
         r'SERVER=localhost;'
         r'DATABASE=seis603_pricing_project;'
         r'UID=python_dev;'
-        r'PWD=python_dev'
+        r'PWD=python_dev;'
         )
     cursor = conn.cursor()
     return cursor

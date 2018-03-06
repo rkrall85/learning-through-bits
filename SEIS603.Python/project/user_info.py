@@ -5,11 +5,11 @@
 
 class User():
     def __init__(self, db_connection,user_name, first_name= None, last_name=None, email=None):
-        self.db_connection = db_connection
-        self.user_name = user_name
-        self.first_name = first_name
-        self.last_name = last_name
-        self.email = email
+        self.db_connection  = db_connection
+        self.user_name      = user_name
+        self.first_name     = first_name
+        self.last_name      = last_name
+        self.email          = email
 
     #getting the user profile from database.
     def GetUser(self):
@@ -35,6 +35,7 @@ class User():
         last_name = data[2]
         email = data[3]
         message = data[4]
+        self.db_connection.commit()#need this to commit transaction
         return user_id,first_name, last_name, email, message
         #message = data[1] #getting message
 
@@ -54,6 +55,7 @@ class User():
         data = self.db_connection.fetchone() #putting results into row class
         user_id = data[0] #getting id
         message = data[1]
+        self.db_connection.commit()#need this to commit transaction
         return user_id,message
         #print('id', data.p_id)
 
