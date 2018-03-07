@@ -5,11 +5,13 @@ import requests
 import bs4
 
 class ItemPrice():
-    def __init__(self,db_connection):
+    def __init__(self,db_connection, item_id = 0):
         self.db_connection          = db_connection
+        self.item_id                = item_id
 
     def CreateDailyPrice(self):
-        sql = "EXEC [dbo].[usp_GetStoreItems];"
+        #create special logic for all or one item
+        sql = "EXEC [dbo].[usp_GetTrackItems]{}".format(self.item_id)
         self.db_connection.execute(sql)
         list_items = self.db_connection.fetchall()#[0] #fetchone will only return first result
         self.db_connection.commit()#need this to commit transaction
@@ -22,7 +24,6 @@ class ItemPrice():
             web_scrap = i[4]
             if web_scrap.lower() == 'y':
                 self.WebScrap(item_id,store_id, item_url, item_web_class)
-
 
     def WebScrap(self,item_id, store_id, item_url, item_web_class):
         #setting up for web scrap using BeautifulSoup
@@ -46,8 +47,16 @@ class ItemPrice():
 
     #Place holder for API function grab
 
-
     def InsertDailyPrice(self,item_id, store_id, current_price):
         sql = "EXEC [dbo].[usp_CreateItemPriceHistory] {},{},{}".format(item_id,store_id,current_price)
         self.db_connection.execute(sql)#, params) #executing sproc
         self.db_connection.commit()#need this to commit transaction
+
+    def GetDailyPrice(self, store_id, user_id):
+        sql = "EXEC [dbo].[usp_GetUserCurrentPriceItem] {},{},{}".format(self.item_id,store_id, user_id)
+        self.db_connection.execute(sql)#, params) #executing sproc
+        list_item_price = db_connection.fetchall()#[0] #fetchone will only return first result
+        labels = ['item id','item name','store id','store name','purchase price','purchase date','latest recorded date','latest recorded price']
+        df = pd.DataFrame.from_records(list_item_price, columns=labels) #create dataframe from list
+        print (df) #output dataframe
+        db_connection.commit()#need this to commit transaction

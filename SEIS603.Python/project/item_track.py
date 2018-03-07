@@ -1,6 +1,5 @@
 
 
-
 class Item():
     def __init__(self,dt, db_connection,user_id, store_id,store_name,item_id,web_scrap):
         self.dt                     = dt
@@ -19,17 +18,15 @@ class Item():
         i_url = input("What is the URL of the item from {}:".format(self.store_name))
         i_web_class = input("What is the web class for item you want to track (for example: .product--meta__price )?")
         self.StoreItem(i_url,i_web_class)
-        self.TrackItem(i_price,i_p_date)
-        #only call if the website is web scrap otherwise API will be used
-        return web_scrap,i_url, i_web_class
-        if self.web_scrap == 'y': self.WebScrap(i_url,i_price,i_web_class)
+        self.UserTrackItem(i_price,i_p_date)
+
 
     def StoreItem(self,item_url,item_web_class):
         sql = "EXEC [dbo].[usp_CreateStoreItem] {},{},'{}','{}'".format(self.store_id,self.item_id,item_url, item_web_class)
         self.db_connection.execute(sql)#, params) #executing sproc
         self.db_connection.commit()#need this to commit transaction
 
-    def TrackItem(self,item_price,item_purschase_date):
+    def UserTrackItem(self,item_price,item_purschase_date):
         sql =  """\
                 DECLARE	@user_id INT,
                            @item_id INT,

@@ -19,18 +19,9 @@ class Item():
         #need to return item id
         return 101
 
-
-
 def GetItems(db_connection):
     sql = "EXEC [dbo].[usp_GetItems];"
     db_connection.execute(sql)
     return db_connection.fetchall()#[0] #fetchone will only return first result
 
-def GetStoreItems(db_connection, store_id):
-    sql = "EXEC [dbo].[usp_GetStoreItems] {}".format(store_id)
-    db_connection.execute(sql)#, params) #executing sproc
-    list_store_items = db_connection.fetchall()#[0] #fetchone will only return first result
-    labels = ['item id','item name']
-    df_store_items = pd.DataFrame.from_records(list_store_items, columns=labels) #create dataframe from list
-    print (df_store_items) #output dataframe
-    db_connection.commit()#need this to commit transaction
+#def GetItemInfo(db_connect, item_id):
