@@ -1,59 +1,91 @@
 #main program to handle input from user.
 
+#python libraries
 import datetime as dt
+import db_connection as dbconn
+import pandas as pd
 
-import db_connection as d
-import user_profile as up
-import stores as s
-import items as it
+#various user scripts
+import user_profile as usrprfl
+import stores as strs
+import items as itms
+import item_track as itmtrck
+import item_price_history as itmprchstry
 
 
-db_connection = d.database_connection()
-
-def PriceTrackInput(db_connection):
-    print("We currently support the following stores")
-    lst_stores = s.GetStores(db_connection)
-    print("Store ID - Store Name")
-    print("_"*100)
-    for i in (lst_stores):
-        print("{} - {}".format(i[0],i[1]))
-
-    s_id = int(input("Which store would you like to start with? (Please enter store id)"))
-    store_name = s.GetStoreName(db_connection,s_id)
-    print("Let's get started with price tracking for an item at {}".format(store_name))
-
-    print("We currently support the following items")
-    lst_items = it.GetItems(db_connection)
-    print("Brand - Name(ID) - Model - Description - UPC")
-    print("_"*100)
-    for i in (lst_items):
-        #brand - Name (ID) - model - desc - UPC
-        print("{} - {}({}) - {} - {} - {}".format(i[1],i[2],i[0],i[3],i[4],i[5]))
-
-    #add function to add new item
-    new_item = input("Item missing and want to add it?")
-    if new_item == 'y': it.CreateItem(db_connection)
-    i_id = int(input("Please enter a item ID:"))
-    i_price = input("What price did you pay?")
-    i_purchase_date = input("When did you purchase the item (mm/dd/yyyy)?")
-    month, day, year = map(int, i_purchase_date.split('/'))
-    i_date = dt.date(year, month, day)
-    i_url = input("What is the URL of the item from {}:".format(store_name))
-
-    return i_id, s_id,i_price, i_date, i_url
+db_connection = dbconn.database_connection()
 
 #def main():
 ############Getting user profile information###################
-
 current_user = str(input("Are you a user(y/n)?"))
-user = up.User(db_connection, current_user = current_user)
+user = usrprfl.User(db_connection, current_user = current_user)
 user_profile = user.UserProfile()
 user_id = user_profile[0]
 first_name = user_profile[1]
+#################################################################
+
+
+######show current tracking of items#############################
+print("You are currently tracking the following itmes at each store")
+usrprfl.GetCurrentTracking(db_connection,user_id)
+print(""*100)
+#################################################################
+
+track_new_item = str(input("Would you like to track a new item(y/n)?"))
+if track_new_item.lower() ==  'y':
+    ###########Gettting Store information#############################
+    print("We currently support the following stores")
+    lst_stores = strs.GetStores(db_connection)
+    labels = ['Store ID', 'Store Name']
+    df_stores = pd.DataFrame.from_records(lst_stores, columns=labels) #create dataframe from list
+    print (df_stores) #output dataframe
+    print(""*100)
+    store_id = int(input("Which store would you like to start with? (Please enter store id)"))
+    store_info = strs.GetStoreInfo(db_connection,store_id)
+    store_name = store_info[0]
+    web_scrap = store_info[1]
+    print("Let's get started with price tracking for an item at {}".format(store_name))
+    #################################################################
+
+    #######Getting Item information#################################
+    print("We currently support the following items for {}".format(store_name))
+    itms.GetStoreItems(db_connection=db_connection, store_id=store_id)
+    new_item = str(input("Create a new item(y/n)?"))
+    item_id = 0
+    if new_item.lower() == 'y':
+        item = itms.Item(db_connection, user_id = user_id,store_id = store_id,store_name  = store_name)
+        new_item = item.CreateItem()
+        item_id = new_item[0] #grab the item id
+
+    #if item_id == 0: item_id = int(input("Enter Item ID:"))
+'''
+current_track = str(input("Track item(y/n)?"))
+if current_track.lower() == 'y':
+    track_item = itmtrck.Item(dt,db_connection, user_id = user_id,store_id = store_id,store_name  = store_name, item_id= item_id, web_scrap = web_scrap)
+    track_item.TrackInput()
+    web_scrap = track_item[0]
+    item_url = track_item[1]
+    item_web_class = track_item[2]
+else:
+    user_track_items = itmtrck.GetuserTrackItem(db_connection, user_id = user_id, item_id= item_id, store_id= store_id )
+    web_scrap = user_track_items[0]
+    item_url = user_track_items[1]
+    item_web_class = user_track_items[2]
+'''
+#################################################################
+
+
+########Grab daily price all items###############################
+track_item_daily = itmprchstry.ItemPrice(db_connection)
+track_item_daily.CreateDailyPrice()
+#################################################################
 
 
 
-print(user_id, first_name)
+
+
+
+
 
 #print(user_name)
 

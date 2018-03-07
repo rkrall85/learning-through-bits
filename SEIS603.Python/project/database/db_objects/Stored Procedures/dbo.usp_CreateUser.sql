@@ -46,10 +46,17 @@ BEGIN
 				
 				SELECT @user_id = @@IDENTITY, @message = 'Success'
 			END
-         ELSE
-			SELECT @user_id = u.u_id , @message = 'Success' 
-			FROM dbo.[User] AS u WHERE u.u_name= @user_name
-           
+         ELSE 
+			IF EXISTS (SELECT 1 FROM dbo.[User] WHERE [User].u_name= @user_name)
+				begin
+					SELECT @user_id = u.u_id , @message = 'Success' 
+					FROM dbo.[User] AS u WHERE u.u_name= @user_name
+				end
+			ELSE 
+				BEGIN 
+					SELECT @user_id = 0, @message = 'Failure'
+				END 
+				   
 		
 END
 GO

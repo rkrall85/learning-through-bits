@@ -5,42 +5,19 @@
 
 
 class Item():
-    def __init__(self, db_connection,user_id, item_id, store_id,item_price, item_purschase_date, item_url):
+    def __init__(self,dt, db_connection,user_id, store_id,store_name):
+        self.dt                     = dt
         self.db_connection          = db_connection
         self.user_id                = user_id
-        self.item_id                = item_id
         self.store_id               = store_id
-        self.item_price             = item_price
-        self.item_purschase_date    = item_purschase_date
-        self.item_url               = item_url
+        self.store_name             =  store_name
 
-    def StoreItem(self):
-        sql = "EXEC [dbo].[usp_CreateStoreItem] {},{},'{}'".format(self.store_id,self.item_id, self.item_url)
-        self.db_connection.execute(sql)#, params) #executing sproc
-        self.db_connection.commit()#need this to commit transaction
 
-    def TrackItem(self):
-        sql =  """\
-                DECLARE	@user_id INT,
-	                       @item_id INT,
-	                       @store_id int,
-	                       @price DEC(8,2),
-	                       @purchase_date DATE,
-	                       @message VARCHAR(50);
-                exec [dbo].[usp_CreateUserItemTrack] @user_id = ?,
-                                             @item_id = ?,
-                                             @store_id = ?,
-                                             @price = ? ,
-                                             @purchase_date = ?,
-                                             @message = @message OUTPUT;
-                Select @message;
-            """
-        params = (self.user_id,self.item_id,self.store_id,self.item_price,self.item_purschase_date,) #creating parms
-        self.db_connection.execute(sql, params) #executing sproc
-        data = self.db_connection.fetchone() #putting results into row class
-        message = data[0]
-        self.db_connection.commit()#need this to commit transaction
-        return message
+    def CreateItem(self):
+        print("place holder for create item")
+        #insert into item table as well as store_item table
+        #need to return item id
+        return 101
 
 
 
@@ -49,6 +26,11 @@ def GetItems(db_connection):
     db_connection.execute(sql)
     return db_connection.fetchall()#[0] #fetchone will only return first result
 
-
-def CreateItem(db_connection):
-    print("Create new item place holder")
+def GetStoreItems(db_connection, store_id):
+    sql = "EXEC [dbo].[usp_GetStoreItems] {}".format(store_id)
+    db_connection.execute(sql)#, params) #executing sproc
+    list_store_items = db_connection.fetchall()#[0] #fetchone will only return first result
+    labels = ['item id','item name']
+    df_store_items = pd.DataFrame.from_records(list_store_items, columns=labels) #create dataframe from list
+    print (df_store_items) #output dataframe
+    db_connection.commit()#need this to commit transaction

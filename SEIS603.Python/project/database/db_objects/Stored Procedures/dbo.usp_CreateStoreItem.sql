@@ -11,7 +11,8 @@ CREATE PROCEDURE [dbo].[usp_CreateStoreItem]
 	-- Add the parameters for the stored procedure here
 	@s_id			INT,
 	@i_id			INT,
-	@i_url			VARCHAR(500)
+	@i_url			VARCHAR(500),
+	@i_web_class	VARCHAR(50)
 	--@message_out	VARCHAR(500) output
 
 	
@@ -25,25 +26,28 @@ BEGIN
 
 
     -- Insert statements for procedure here
-	/*
 	IF NOT EXISTS (	SELECT 1 
 					FROM dbo.StoreItem AS si
 					WHERE si.s_id = @s_id
 						AND si.i_id =@i_id						
-		) */
+		) 
+		BEGIN 
 			INSERT INTO dbo.StoreItem (
 	                              s_id
 	                            , i_id
 	                            , i_url
+								, i_web_class
 	                          )
 			VALUES ( @s_id  -- s_id - int
 				   , @i_id -- i_id - int
-					, @i_url -- i_url - varchar(500)
+					, rtrim(LTRIM(@i_url)) -- i_url - varchar(500)
+					, rtrim(LTRIM(@i_web_class))
+
 				)
 			;
-
 			--SELECT @message_out = 'Successful'
-		
+		END 
+	
         
 
 END

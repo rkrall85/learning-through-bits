@@ -1,0 +1,42 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+-- =============================================
+-- Author:		Robert Krall
+-- Create date: 03/02/2018
+-- Description:	Get all valid store items to grab the price.
+-- =============================================
+CREATE PROCEDURE [dbo].[usp_GetStoreItems]
+-- Add the parameters for the stored procedure here
+
+AS
+    BEGIN
+        /*
+	@item_id INT OUT, 
+	@store_id INT OUT, 
+	@item_url VARCHAR(500) out,
+	@item_web_class VARCHAR(50) out,
+	@web_scrap	CHAR(1) OUT
+*/
+
+
+        -- SET NOCOUNT ON added to prevent extra result sets from
+        -- interfering with SELECT statements.
+        --SET NOCOUNT ON;
+
+        SELECT     i.i_id
+                 , si.s_id
+                 , si.i_url
+                 , si.i_web_class
+                 , s.web_scrap
+        FROM       dbo.Item AS i
+        INNER JOIN dbo.StoreItem AS si
+            ON i.i_id = si.i_id
+        INNER JOIN dbo.Store AS s
+            ON si.s_id = s.s_id;
+
+
+
+    END;
+GO

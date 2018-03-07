@@ -17,7 +17,7 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	SELECT s_name
+	SELECT s_name, web_scrap
 	FROM dbo.Store AS s
 	WHERE s.s_id = @s_id;
 END
