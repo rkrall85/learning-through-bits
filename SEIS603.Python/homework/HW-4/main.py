@@ -9,7 +9,7 @@ def input_function():
     #if year is less than 1582 they need to reenter the year
     if user_year < 1582:
         print("Please enter a year greater than 1582")
-        input_fucntion()
+        input_function()
     else:
         #step 1
         if user_year % 4==0:
