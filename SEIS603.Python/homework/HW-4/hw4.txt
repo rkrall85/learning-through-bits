@@ -1,0 +1,18 @@
+HW 4: Conditionals and Loops                               15 points
+
+Write a program that asks the user for an integer representing a year. Only a year on or after 1582 must be allowed – this is the year that the Gregorian calendar was adopted. Any year less than this should result in an error message followed by asking the user to re-enter a more appropriate value.
+
+Your program will then determine whether the year input by the user is a leap year (or not) in the Gregorian calendar. Note that a leap year has 29 days in February.
+
+The rules for determining a leap year can be found at: https://support.microsoft.com/en-us/help/214019/method-to-determine-whether-a-year-is-a-leap-year
+
+To determine whether a year is a leap year, follow these steps (excerpted from link above):
+
+If the year is evenly divisible by 4, go to step 2. Otherwise, go to step 5.
+If the year is evenly divisible by 100, go to step 3. Otherwise, go to step 4.
+If the year is evenly divisible by 400, go to step 4. Otherwise, go to step 5.
+The year is a leap year (it has 366 days).
+The year is not a leap year (it has 365 days).
+Allow the user to evaluate multiple years. The user may terminate the program using an appropriate sentinel value.
+
+Place your code in a file named main.py and check it into Canvas.
