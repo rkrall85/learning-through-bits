@@ -33,20 +33,21 @@ class ItemPrice():
         #error handling incase the handshake to the website failed
         try:
             res = requests.get(item_url)
+            #soup = bs4.BeautifulSoup(res.text,'lxml')
+            soup = bs4.BeautifulSoup(res.text,'html.parser')
+            store_price = soup.find("div", class_=item_div_class).find("span", class_=item_span_class)
         except:
             print("error web scrapping {}".format(item_url))
             return ("error")
 
-        #soup = bs4.BeautifulSoup(res.text,'lxml')
-        soup = bs4.BeautifulSoup(res.text,'html.parser')
-
         print("finding price at {}".format(item_url))
         #finding the price based on the div and span class of the website
-        store_price = soup.find("div", class_=item_div_class).find("span", class_=item_span_class)
         current_price = float(0)
         #remove $sign if its there and casting to a int
-
-        if store_price != None:
+        if store_price == None:
+            print("Error finding price")
+            return("error")
+        elif store_price != None:
             current_price = store_price.text
             if current_price[0] == '$':
                 current_price = float(current_price[1:])
