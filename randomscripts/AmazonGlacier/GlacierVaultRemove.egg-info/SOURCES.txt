@@ -1,6 +1,0 @@
-setup.py
-GlacierVaultRemove.egg-info/PKG-INFO
-GlacierVaultRemove.egg-info/SOURCES.txt
-GlacierVaultRemove.egg-info/dependency_links.txt
-GlacierVaultRemove.egg-info/requires.txt
-GlacierVaultRemove.egg-info/top_level.txt
