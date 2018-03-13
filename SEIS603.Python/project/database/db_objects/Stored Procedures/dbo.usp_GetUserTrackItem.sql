@@ -33,7 +33,7 @@ BEGIN
 					FROM       dbo.Item AS i
 					INNER JOIN dbo.StoreItem AS si	ON i.i_id = si.i_id
 					INNER JOIN dbo.Store AS s		ON si.s_id = s.s_id
-					INNER JOIN dbo.UserItemTracking AS uit
+					INNER JOIN dbo.UserPriceProtection AS uit
 										ON i.i_id = uit.i_id
 											AND s.s_id = uit.s_id
 											AND si.i_id = uit.i_id
@@ -49,14 +49,14 @@ BEGIN
 					--, si.s_id
 					--,
 					@item_url_out = si.i_url
-					, @item_web_class_out = si.i_web_class
+					, @item_web_class_out = si.i_div_class
 					--, s.s_name
 					,@web_scrap_out =  s.web_scrap
 					--, uit.price AS UserPrice
 		FROM       dbo.Item AS i
 		INNER JOIN dbo.StoreItem AS si	ON i.i_id = si.i_id
 		INNER JOIN dbo.Store AS s		ON si.s_id = s.s_id
-		INNER JOIN dbo.UserItemTracking AS uit
+		INNER JOIN dbo.UserPriceProtection AS uit
 										ON i.i_id = uit.i_id
 											AND s.s_id = uit.s_id
 											AND si.i_id = uit.i_id

@@ -7,7 +7,7 @@ GO
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-create PROCEDURE [dbo].[usp_GetUserCurrentPriceItem]
+CREATE PROCEDURE [dbo].[usp_GetUserCurrentPriceItem]
 	-- Add the parameters for the stored procedure here
 	@item_id INT,
 	@store_id INT,
@@ -30,7 +30,7 @@ SELECT uit.i_id
 	 , s.s_name
      , uit.price AS purchased_price
      , uit.purchase_date
-FROM dbo.UserItemTracking AS uit
+FROM dbo.UserPriceProtection AS uit
 inner JOIN dbo.Store AS s ON uit.s_id = s.s_id
 inner JOIN dbo.Item AS i ON uit.i_id = i.i_id
 WHERE uit.u_id = @user_id

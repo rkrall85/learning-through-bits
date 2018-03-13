@@ -36,7 +36,7 @@ BEGIN
 	                              s_id
 	                            , i_id
 	                            , i_url
-								, i_web_class
+								, i_div_class
 	                          )
 			VALUES ( @s_id  -- s_id - int
 				   , @i_id -- i_id - int

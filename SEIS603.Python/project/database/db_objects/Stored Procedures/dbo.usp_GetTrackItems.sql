@@ -28,15 +28,20 @@ AS
 	SELECT     i.i_id
 				     , si.s_id
 					 , si.i_url
-					, si.i_web_class
+					, si.i_div_class
+					, si.i_span_class
 					, s.web_scrap
 			FROM       dbo.Item AS i
 			INNER JOIN dbo.StoreItem AS si
 	            ON i.i_id = si.i_id
 		    INNER JOIN dbo.Store AS s
 			    ON si.s_id = s.s_id
-			WHERE i.i_id = @item_id 
-	
+			WHERE s.enabled='y' ---grabbing only valid stores
+			AND ISNULL(@item_id,0) = 
+				CASE
+					WHEN @item_id != 0 THEN @item_id 
+					ELSE 0
+				END
 
     END;
 GO
