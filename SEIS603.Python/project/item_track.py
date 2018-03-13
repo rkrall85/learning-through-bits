@@ -1,56 +1,27 @@
 
 
-class Item():
-    def __init__(self,dt, db_connection,user_id, store_id,store_name,item_id,web_scrap):
-        self.dt                     = dt
-        self.db_connection          = db_connection
-        self.user_id                = user_id
-        self.store_id               = store_id
-        self.store_name             = store_name
-        self.item_id                = item_id
-        self.web_scrap              = web_scrap
-
-    def TrackInput(self):
-        i_price = input("What price did you pay?")
-        i_purchase_date = input("When did you purchase the item (mm/dd/yyyy)?")
-        month, day, year = map(int, i_purchase_date.split('/'))
-        i_p_date = self.dt.date(year, month, day)
-        i_url = input("What is the URL of the item from {}:".format(self.store_name))
-        i_web_class = input("What is the web class for item you want to track (for example: .product--meta__price )?")
-        self.StoreItem(i_url,i_web_class)
-        self.UserTrackItem(i_price,i_p_date)
+#this script is for tracking items for a user.
+def GetCurrentTracking(db_connection,pd,user_id):
+    #function to grab all items a user is tracking
+    sql = "EXEC [dbo].[usp_GetCurrentTracking] {}".format(user_id)
+    db_connection.execute(sql)#, params) #executing sproc
+    list_items = db_connection.fetchall()#[0] #fetchone will only return first result
+    #df = pd.Series(list_items)
+    labels = ['item id','item name']
+    df = pd.DataFrame.from_records(list_items, columns=labels) #create dataframe from list
+    print (df) #output dataframe
+    db_connection.commit()#need this to commit transaction
 
 
-    def StoreItem(self,item_url,item_web_class):
-        sql = "EXEC [dbo].[usp_CreateStoreItem] {},{},'{}','{}'".format(self.store_id,self.item_id,item_url, item_web_class)
-        self.db_connection.execute(sql)#, params) #executing sproc
-        self.db_connection.commit()#need this to commit transaction
-
-    def UserTrackItem(self,item_price,item_purschase_date):
-        sql =  """\
-                DECLARE	@user_id INT,
-                           @item_id INT,
-                           @store_id int,
-                           @price DEC(8,2),
-                           @purchase_date DATE,
-                           @message VARCHAR(50);
-                exec [dbo].[usp_CreateUserItemTrack] @user_id = ?,
-                                             @item_id = ?,
-                                             @store_id = ?,
-                                             @price = ? ,
-                                             @purchase_date = ?,
-                                             @message = @message OUTPUT;
-                Select @message;
-            """
-        params = (self.user_id,self.item_id,self.store_id,item_price,item_purschase_date,) #creating parms
-        self.db_connection.execute(sql, params) #executing sproc
-        data = self.db_connection.fetchone() #putting results into row class
-        message = data[0]
-        self.db_connection.commit()#need this to commit transaction
-
+def CreateUserItemTrack(db_connection, user_id, item_id):
+    #Create user item track record
+    sql = "EXEC [dbo].[usp_CreateUserItemTrack] {},{}".format(user_id, item_id)
+    db_connection.execute(sql)#, params) #executing sproc
+    db_connection.commit()#need this to commit transaction
 
 
 def GetuserTrackItem(db_connection, user_id, item_id, store_id):
+    #grab all items they are tracking
     sql =  """\
             DECLARE	@user_id INT,
                        @item_id INT,
@@ -75,3 +46,34 @@ def GetuserTrackItem(db_connection, user_id, item_id, store_id):
     item_web_class = data[2]
     db_connection.commit()
     return web_scrap,item_url,item_web_class
+
+
+#Getting an items pricing listing
+def GetUserItemTrackPrices(db_connection, pd, user_id, item_id):
+    sql = "EXEC [dbo].[usp_GetUserItemTrackPrices] {},{}".format(user_id,item_id)
+    db_connection.execute(sql) #executing sproc
+    price_lists = db_connection.fetchall()#[0] #fetchone will only return first result
+    labels = ['item id','item name','store id','store name','current price']
+    df_current_price = pd.DataFrame.from_records(price_lists, columns=labels) #create dataframe from list
+    #pivot data so its easier to read to compare prices between stores.
+    pvt_current_prices =  df_current_price.pivot(index='store name',columns='item name',values = 'current price' )
+    print(pvt_current_prices)
+
+'''
+def GetUserCurrentPriceItem(db_connection,pd, item_id, store_id, user_id):
+    #Get item
+    sql =  """\
+            exec [dbo].[usp_GetUserCurrentPriceItem] @item_id = ?,
+                                         @store_id = ?,
+                                         @user_id = ?
+                                         ;
+
+        """
+    params = (item_id,store_id,user_id,) #creating parms
+    db_connection.execute(sql, params) #executing sproc
+    price_lists = db_connection.fetchall()#[0] #fetchone will only return first result
+    labels = ['item id','item name','store id','store name','purchase price','purchase date','latest recorded date','latest recorded price']
+    df_current_price = pd.DataFrame.from_records(price_lists, columns=labels) #create dataframe from list
+    print (df_current_price) #output dataframe
+    db_connection.commit()#need this to commit transaction
+'''

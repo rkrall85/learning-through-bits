@@ -3,6 +3,7 @@
 
 import requests
 import bs4
+from pyquery import PyQuery
 
 class ItemPrice():
     def __init__(self,db_connection, item_id = 0):
@@ -14,36 +15,47 @@ class ItemPrice():
         sql = "EXEC [dbo].[usp_GetTrackItems]{}".format(self.item_id)
         self.db_connection.execute(sql)
         list_items = self.db_connection.fetchall()#[0] #fetchone will only return first result
-        self.db_connection.commit()#need this to commit transaction
-
+        #loop through all stores for an item
         for i in (list_items):
             item_id = i[0]
             store_id = i[1]
             item_url = i[2]
-            item_web_class = i[3]
-            web_scrap = i[4]
+            item_div_class = i[3]
+            item_span_class = i[4]
+            web_scrap = i[5]
             if web_scrap.lower() == 'y':
-                self.WebScrap(item_id,store_id, item_url, item_web_class)
+                self.WebScrap(item_id,store_id, item_url, item_div_class,item_span_class)
 
-    def WebScrap(self,item_id, store_id, item_url, item_web_class):
+        self.db_connection.commit()#need this to commit transaction
+
+    def WebScrap(self,item_id, store_id, item_url, item_div_class,item_span_class):
         #setting up for web scrap using BeautifulSoup
-        res = requests.get(item_url)
-        soup = bs4.BeautifulSoup(res.text,'lxml')
-        store_item_price = ''
+        #error handling incase the handshake to the website failed
+        try:
+            res = requests.get(item_url)
+        except:
+            print("error web scrapping {}".format(item_url))
+            return ("error")
 
-        #grabbing all prices
-        for item in soup.select(item_web_class):
-            store_item_price = item.text
+        #soup = bs4.BeautifulSoup(res.text,'lxml')
+        soup = bs4.BeautifulSoup(res.text,'html.parser')
 
-        #Incase more than one price is given
-        prices = store_item_price.split(' ')
-        current_prices = []
-        for i in range(len(prices)):
-                current_price = prices[i]
-                current_prices.append(int(current_price[1:])) #remove $ sign and cast to int
+        print("finding price at {}".format(item_url))
+        #finding the price based on the div and span class of the website
+        store_price = soup.find("div", class_=item_div_class).find("span", class_=item_span_class)
+        current_price = float(0)
+        #remove $sign if its there and casting to a int
 
-        current_store_price = min(current_prices) #finding the min price if there are multi prices
-        self.InsertDailyPrice(item_id, store_id, current_store_price) #Calling function to insert rows into db
+        if store_price != None:
+            current_price = store_price.text
+            if current_price[0] == '$':
+                current_price = float(current_price[1:])
+            else:
+                current_price = float(current_price)
+            print("Price found: {}".format(current_price))
+
+        if current_price != float(0):
+            self.InsertDailyPrice(item_id, store_id, current_price) #Calling function to insert rows into db
 
     #Place holder for API function grab
 

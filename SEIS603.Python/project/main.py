@@ -8,9 +8,9 @@ import pandas as pd
 #various user scripts
 import user_profile as usrprfl
 import stores as strs
-import items as itms
-import item_track as itmtrck
-import item_price_history as itmprchstry
+import items
+import item_track
+import item_price_history
 
 
 db_connection = dbconn.database_connection()
@@ -25,14 +25,63 @@ first_name = user_profile[1]
 #################################################################
 
 
-######show current tracking of items#############################
-print("You are currently tracking the following itmes at each store")
-usrprfl.GetCurrentTracking(db_connection,user_id)
-print(""*100)
+######Current Items Tracking Tracking Items#######################
+print("You are currently tracking the following itmes")
+item_track.GetCurrentTracking(db_connection,pd,user_id)
+print("*"*75)
+print("Current prices at items tracking")
+item_track.GetUserItemTrackPrices(db_connection=db_connection,pd=pd,user_id=user_id, item_id="NULL")
+print("*"*75)
 #################################################################
 
+####Track New Item##############################################
 track_new_item = str(input("Would you like to track a new item(y/n)?"))
+item_id = 0
 if track_new_item.lower() ==  'y':
+    print("Current Items supported")
+    items.GetItems(db_connection,pd)
+    item_listed = str(input("Is your item listed(y/n)?"))
+    if item_listed == 'n':
+        print("place holder for new item")
+        #ask for store
+        #ask for item info
+    else:
+        item_id = int(input("Please enter the item id:"))
+    #item_track.CreateUserItemTrack(db_connection=db_connection,user_id=user_id, item_id=item_id)
+#################################################################
+
+
+
+
+
+
+#####Grab Current website prices#################################
+if item_id == 0: item_id = "NULL" #convert to null for sproc to grab all items
+#issue with babies r us web scrap
+track_item_daily = item_price_history.ItemPrice(db_connection, item_id=item_id)
+track_item_daily.CreateDailyPrice()
+item_track.GetUserItemTrackPrices(db_connection=db_connection,pd=pd,user_id=user_id, item_id=item_id)
+#################################################################
+
+
+
+#################################################################
+
+
+
+
+#################################################################
+
+#############Output current prices of items track################
+
+
+#################################################################
+
+
+#item_track.GetCurrentTracking(db_connection,pd,user_id)
+#################################################################
+'''
+
     ###########Gettting Store information#############################
     print("We currently support the following stores")
     lst_stores = strs.GetStores(db_connection)
@@ -50,7 +99,6 @@ if track_new_item.lower() ==  'y':
     print("We currently support the following items for {}".format(store_name))
     strs.GetStoreItems(db_connection=db_connection,pd = pd,store_id=store_id)
     new_item = str(input("Create a new item(y/n)?"))
-    item_id = 0
     if new_item.lower() == 'y':
         item = itms.Item(db_connection, user_id = user_id,store_id = store_id,store_name  = store_name)
         new_item = item.CreateItem()
@@ -64,7 +112,7 @@ if track_new_item.lower() ==  'y':
 
 
 ########Grab daily price (one item or all)###############################
-track_item_daily = itmprchstry.ItemPrice(db_connection, item_id)
+track_item_daily = itmprchstry.ItemPrice(db_connection, item_id=item_id)
 track_item_daily.CreateDailyPrice()
 #################################################################
 if item_id == 0:
@@ -73,5 +121,5 @@ else:
     print("Summary of item you just set up for tracking")
     usrprfl.GetUserCurrentPriceItem(db_connection, pd, item_id, store_id, user_id)
 
-
+'''
 ##reporting done off of juypter####

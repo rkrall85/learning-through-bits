@@ -91,32 +91,4 @@ class User():
         return user_id,message
         #print('id', data.p_id)
 
-
-def GetCurrentTracking(db_connection,user_id):
-    sql = "EXEC [dbo].[usp_GetCurrentTracking] {}".format(user_id)
-    db_connection.execute(sql)#, params) #executing sproc
-    list_items = db_connection.fetchall()#[0] #fetchone will only return first result
-    #df = pd.Series(list_items)
-    labels = ['item id','item name','store id','store name','purchase price','purchase date','latest recorded date','latest recorded price']
-    df = pd.DataFrame.from_records(list_items, columns=labels) #create dataframe from list
-    print (df) #output dataframe
-    db_connection.commit()#need this to commit transaction
-
-def GetUserCurrentPriceItem(db_connection,pd, item_id, store_id, user_id):
-    sql =  """\
-            exec [dbo].[usp_GetUserCurrentPriceItem] @item_id = ?,
-                                         @store_id = ?,
-                                         @user_id = ?
-                                         ;
-
-        """
-    params = (item_id,store_id,user_id,) #creating parms
-    db_connection.execute(sql, params) #executing sproc
-    price_lists = db_connection.fetchall()#[0] #fetchone will only return first result
-    labels = ['item id','item name','store id','store name','purchase price','purchase date','latest recorded date','latest recorded price']
-    df_current_price = pd.DataFrame.from_records(price_lists, columns=labels) #create dataframe from list
-    print (df_current_price) #output dataframe
-    db_connection.commit()#need this to commit transaction
-
-
 #print(username.GetUser()[0])#output user_id

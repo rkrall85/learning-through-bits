@@ -19,9 +19,15 @@ class Item():
         #need to return item id
         return 101
 
-def GetItems(db_connection):
+def GetItems(db_connection,pd):
     sql = "EXEC [dbo].[usp_GetItems];"
     db_connection.execute(sql)
-    return db_connection.fetchall()#[0] #fetchone will only return first result
+    list_items = db_connection.fetchall()
+    labels = ['ID','Brand','Name','Model','Description','UPC'] #might drop UPC
+    df = pd.DataFrame.from_records(list_items, columns=labels) #create dataframe from list
+    print (df) #output dataframe
+    db_connection.commit()#need this to commit transaction
+
+
 
 #def GetItemInfo(db_connect, item_id):
