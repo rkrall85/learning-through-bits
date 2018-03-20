@@ -40,7 +40,7 @@ INNER JOIN dbo.Item AS i ON uit.i_id = i.i_id
 WHERE uit.u_id=@user_id
 	AND ISNULL(@item_id,0) = 
 				CASE
-					WHEN @item_id != 0 THEN @item_id 
+					WHEN @item_id != 0 THEN i.i_id 
 					ELSE 0
 				END
 )

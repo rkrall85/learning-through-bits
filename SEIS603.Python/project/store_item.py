@@ -19,11 +19,11 @@ class StoreItem():
         #if missing_active: self.ShowMissingShows()
         #through all the times they want.
         while missing_active:
+            self.ShowMissingShows()
             missing_store_message = input(missing_prompt)
             if missing_store_message == 'quit':
                 missing_active = False
             else:
-                self.ShowMissingShows()
                 missing_store_id = int(input("Please enter the store id:"))
                 #New to insert new item_store
                 self.CreateStoreItem(missing_store_id)

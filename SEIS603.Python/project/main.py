@@ -42,9 +42,9 @@ if track_new_item.lower() ==  'y':
     item_listed = str(input("Is your item listed(y/n)?"))
     if item_listed == 'n':
         print("place holder for new item")
-        item_id = 102
-        #ask for store
-        #ask for item info
+        new_item = items.Item(db_connection, pd)
+        item_id = new_item.CreateItem()
+        print(item_id)
     else:
         item_id = int(input("Please enter the item id:"))
     #item_track.CreateUserItemTrack(db_connection=db_connection,user_id=user_id, item_id=item_id)
