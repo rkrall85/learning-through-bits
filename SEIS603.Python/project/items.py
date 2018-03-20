@@ -10,7 +10,7 @@ class Item():
         self.db_connection          = db_connection
         self.user_id                = user_id
         self.store_id               = store_id
-        self.store_name             =  store_name
+        self.store_name             = store_name
 
 
     def CreateItem(self):
@@ -18,6 +18,10 @@ class Item():
         #insert into item table as well as store_item table
         #need to return item id
         return 101
+
+    def CreateStoreItem(self):
+        print("place holder for store item")
+
 
 def GetItems(db_connection,pd):
     sql = "EXEC [dbo].[usp_GetItems];"

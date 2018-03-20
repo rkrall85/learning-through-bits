@@ -56,7 +56,7 @@ def GetUserItemTrackPrices(db_connection, pd, user_id, item_id):
     labels = ['item id','item name','store id','store name','current price']
     df_current_price = pd.DataFrame.from_records(price_lists, columns=labels) #create dataframe from list
     #pivot data so its easier to read to compare prices between stores.
-    pvt_current_prices =  df_current_price.pivot(index='store name',columns='item name',values = 'current price' )
+    pvt_current_prices =  df_current_price.pivot(index='store name',columns='item name',values = 'current price' ).fillna(0)
     print(pvt_current_prices)
 
 '''

@@ -9,7 +9,7 @@ GO
 -- =============================================
 CREATE PROCEDURE [dbo].[usp_GetStoreItems]
 -- Add the parameters for the stored procedure here
-	@store_id INT = 0
+	@item_id INT = 0
 AS
     BEGIN
         /*
@@ -26,15 +26,14 @@ AS
         --SET NOCOUNT ON;
 	DECLARE @Sql AS VARCHAR(5000)
 	SET @Sql = '
-			SELECT     i.i_id
-				     , i.i_name
-			FROM       dbo.Item AS i
-			INNER JOIN dbo.StoreItem AS si
-	            ON i.i_id = si.i_id
-		    INNER JOIN dbo.Store AS s
-			    ON si.s_id = s.s_id
+			SELECT     s.s_id
+				     , s.s_name
+			FROM       dbo.Store AS s
+			INNER JOIN dbo.StoreItem	AS si ON s.s_id = si.s_id
+			INNER JOIN dbo.Item			AS i  ON si.i_id = i.i_id
 			where 1= 1'
-	IF not(@store_id  = 0) SET @Sql = @Sql + ' and s.s_id = ' + CAST(@store_id AS VARCHAR)
+	--IF not(@store_id  = 0) SET @Sql = @Sql + ' and s.s_id = ' + CAST(@store_id AS VARCHAR)
+	IF not(@item_id  = 0) SET @Sql = @Sql + ' and i.i_id = ' + CAST(@item_id AS VARCHAR)
 	
 	exec(@Sql)            
 				

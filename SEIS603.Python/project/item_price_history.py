@@ -64,7 +64,7 @@ class ItemPrice():
         sql = "EXEC [dbo].[usp_CreateItemPriceHistory] {},{},{}".format(item_id,store_id,current_price)
         self.db_connection.execute(sql)#, params) #executing sproc
         self.db_connection.commit()#need this to commit transaction
-
+'''
     def GetDailyPrice(self, store_id, user_id):
         sql = "EXEC [dbo].[usp_GetUserCurrentPriceItem] {},{},{}".format(self.item_id,store_id, user_id)
         self.db_connection.execute(sql)#, params) #executing sproc
@@ -73,3 +73,4 @@ class ItemPrice():
         df = pd.DataFrame.from_records(list_item_price, columns=labels) #create dataframe from list
         print (df) #output dataframe
         db_connection.commit()#need this to commit transaction
+'''

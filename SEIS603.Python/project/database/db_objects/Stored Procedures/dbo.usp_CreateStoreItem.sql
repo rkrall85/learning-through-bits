@@ -11,8 +11,10 @@ CREATE PROCEDURE [dbo].[usp_CreateStoreItem]
 	-- Add the parameters for the stored procedure here
 	@s_id			INT,
 	@i_id			INT,
+	@i_web_scrap	CHAR(1),
 	@i_url			VARCHAR(500),
-	@i_web_class	VARCHAR(50)
+	@i_div_class	VARCHAR(500),
+	@i_span_class	VARCHAR(500)
 	--@message_out	VARCHAR(500) output
 
 	
@@ -37,12 +39,13 @@ BEGIN
 	                            , i_id
 	                            , i_url
 								, i_div_class
+								, i_span_class
 	                          )
 			VALUES ( @s_id  -- s_id - int
 				   , @i_id -- i_id - int
 					, rtrim(LTRIM(@i_url)) -- i_url - varchar(500)
-					, rtrim(LTRIM(@i_web_class))
-
+					, CASE WHEN lower(@i_web_scrap) = 'y' THEN RTRIM(LTRIM(@i_span_class)) END
+                    , CASE WHEN lower(@i_web_scrap) = 'y' THEN RTRIM(LTRIM(@i_span_class)) end
 				)
 			;
 			--SELECT @message_out = 'Successful'
