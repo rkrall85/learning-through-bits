@@ -28,7 +28,7 @@ library(ROCR)
 #-----------Read File In----------------#
 GPS <- read_excel("github/SIES763.MachineLearning/project/data/GPSRetention_with_Dummies.xlsx")
 #dim(GPS) #dimension of file 9Rows X Columns)
-#Renaming last column so it doesnt have a ? ; that is scewing up variables with attached function
+#Renaming columns so it doesnt have a ? ; that is scewing up variables with attached function
 names(GPS)[length(names(GPS))] <- "RETAINED"
 names(GPS)[6] <- "TOOK_NON_GPS_COURSE_WITHIN_YEAR"
 names(GPS) #read header
