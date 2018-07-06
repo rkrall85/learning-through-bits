@@ -11,9 +11,10 @@ library(plotmo)
 library(Metrics)
 library(ROCR)
 
-GPS <- read_excel("github/SIES763.MachineLearning/project/data/GPSRetention_with_Dummies.xlsx")
+#GPS <- read_excel("github/SIES763.MachineLearning/project/data/GPSRetention_with_Dummies.xlsx")
+GPS <- read_excel("github/SIES763.MachineLearning/project/data/GPSRetention_Dummies.xlsx")
 
-GPS$`Retained?` = as.factor(GPS$`Retained?`)
+GPS$`Retained` = as.factor(GPS$`Retained`)
 GPS = GPS[,-1:-5]
 "
 GPS$OUTCOME_NUMBER = scale(GPS$OUTCOME_NUMBER)
@@ -27,11 +28,11 @@ trainingdata = GPS[assignment == 1, ]
 validatedata = GPS[assignment == 2, ] 
 
 
-lasso = glmnet(`Retained?`~., trainingdata, alpha = 1, family = 'binomial')
+lasso = glmnet(`Retained`~., trainingdata, alpha = 1, family = 'binomial')
 
 plot_glmnet(lasso, label=TRUE)
 
-cv = cv.glmnet(`Retained?`~., trainingdata, alpha = 1, nfolds = 10, family = 'binomial')
+cv = cv.glmnet(`Retained`~., trainingdata, alpha = 1, nfolds = 10, family = 'binomial')
 
 plot(cv)
 
@@ -41,13 +42,13 @@ coef(cv, s = 'lambda.min')
 cv$lambda.1se
 cv$lambda.min
 
-lasso_pred = predict(lasso, validatedata[1:296], s = cv$lambda.1se, type=c("response"))
+lasso_pred = predict(lasso, validatedata[1:74], s = cv$lambda.min, type=c("response"))
 
-auc_lasso = auc(actual = validatedata$`Retained?`, predicted = lasso_pred)
+auc_lasso = auc(actual = validatedata$`Retained`, predicted = lasso_pred)
 
 auc_lasso
 
-pred = prediction(lasso_pred, validatedata$`Retained?`)
+pred = prediction(lasso_pred, validatedata$`Retained`)
 roc = performance(pred, "tpr", "fpr")
 plot(roc)
 
