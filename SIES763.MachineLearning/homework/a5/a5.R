@@ -44,7 +44,7 @@ x = subset(data1, select = -V14)
 y = data1$V14
 
 #---------------Create Model------------------#
-model <- svm(x, y) 
+model <- svm(x, y, kernel='linear') 
 #print(model)
 #summary(model)
 
@@ -55,7 +55,7 @@ pred <- predict(model, x, decision.values = TRUE)
 #----------Question for homework-------------#
 #Question 1: How many support vectors did you find? 536
 summary(model) 
-#Number of Support Vectors:  311
+#Number of Support Vectors:  228
 
 
 #Question 2: List top 3 records that have 
@@ -63,17 +63,19 @@ summary(model)
             #from wT · X + b calculation.
 
 sort(abs(model[["decision.values"]]))[1:3]
-#[1] 0.0004653643 0.0019767191 0.0026969651
+#[1] 0.001103556 0.004214812 0.004297818
 
 #Question 3:
   #What are the "wT · X + b" values for the 
   #following records: 131, 165, 892, 1057?
-model[["decision.values"]][131] #[1] 0.9996738
-model[["decision.values"]][165] #[1] -0.7469051
-model[["decision.values"]][892] #[1] -1.683784
-model[["decision.values"]][1057]#[1] 0.9996626
+model[["decision.values"]][131] #[1] 21.4564
+model[["decision.values"]][165] #[1] -9.299386
+model[["decision.values"]][892] #[1] -4.577076
+model[["decision.values"]][1057]#[1] 26.60004
   #Anything special about those values of these few records?
+  #These four records are extremely far away from the svm line.
+
+
 
 #group out the values
 #plot(cmdscale(dist(data1[,-14])),col = as.integer(data1[,14]),pch = c("o","+")[1:1217 %in% model$index + 1])
-

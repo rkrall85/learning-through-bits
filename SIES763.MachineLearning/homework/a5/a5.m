@@ -20,7 +20,7 @@ y(y>0)=1;
 [ZX, me, signma] = zscore(X);
 
 %Step 4: Create SVM model
-svm_model = fitcsvm(ZX, y, 'KernelFunction', 'rbf', 'Crossval', 'on', 'Standardize', true);
+svm_model = fitcsvm(ZX, y, 'KernelFunction', 'linear', 'Crossval', 'on', 'Standardize', true);
 
 CompactSVMModel = svm_model.Trained{1};
 %Question 1: How many support vectors are there? 827

@@ -1,0 +1,25 @@
+USER MANUAL
+1. Install R and R Studio
+
+2. Download GPSRetention_Dummies.xlsx
+
+3. Download and open ‘ML Project GPS.R’ in RStudio
+
+4. Select Lines 1-11 if Running for the first Time to install the packages -> Close and Open Rstudio as needed.
+   You will not need to run these install packages once they are installed
+
+5. In Line 25 Change the String <REPLACEME> given in read_excel to the path to GPSRetention_Dummies.xlsx
+   Should be something like: GPS <- read_excel("C:/Users/Me/Downloads/GPSRetention_Dummies.xlsx")
+
+6. Select Lines 12-266 and Click 'Run'
+
+7. Read through output and click through plots
+
+8. Download and open ‘Balanced ML Project GPS.R’ in RStudio in RStudio
+
+9. In Line 2 Change the String <REPLACEME> given in read_excel to the path to GPSRetention_Dummies.xlsx
+   Should be something like: GPS <- read_excel("C:/Users/Me/Downloads/GPSRetention_Dummies.xlsx")
+
+10. Select Lines 2-249 and Click 'Run'
+
+15. Read through output and click through plots
