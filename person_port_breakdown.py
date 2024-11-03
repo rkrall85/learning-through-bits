@@ -73,9 +73,10 @@ pivot_df.sort_values(by='Total Visits', ascending=False, inplace=True)
 # Sort within each port by the number of visits for each person
 sorted_cols = ['Port', 'Total Visits'] + sorted(pivot_df.columns[2:], key=lambda col: pivot_df[col].sum(), reverse=True)
 pivot_df = pivot_df[sorted_cols]
+pivot_df.sort_values(by=sorted_cols[1:], ascending=False, inplace=True)
 
-# Reset index
+# Remove index
 pivot_df.reset_index(inplace=True)
-pivot_df.columns.name = None  # Remove the axis name
+pivot_df = pivot_df.drop('index', axis=1)
 
 pivot_df
