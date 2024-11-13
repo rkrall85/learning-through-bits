@@ -17,12 +17,14 @@ def get_env_vars(copy_file=False):
 
 def get_column_names():
     tab_cruise_data_column_names = {
-        0: 'Booking #', 1: 'Year', 2: 'Month', 3: 'YM', 4: 'Brand', 5: 'Ship', 6: 'Itinerary', 7: 'Itinerary Category',
-        8: 'Home Port', 9: 'Class', 10: 'Days', 11: 'Category', 12: 'Category Rank', 13: 'Room Type', 14: 'Cruise Amount',
-        15: 'Gratuities', 16: 'Room Price',17: 'Room Price Per Day', 18: 'Cruise Amount Per Day', 19: 'Airfare',
-        20: 'Drink Package', 21: 'Total Cruise Amount', 22: 'Costco Rebate', 23: 'Shareholder', 24: 'OBC',
-        25: 'AARP Rebate', 26: 'Total Savings', 27: 'Final Cruise Price', 28: 'Ports', 29: 'Room #', 30: 'Floor',
-        31: 'Excursions', 32: 'Notes', 33: 'Who Went', 34: "Room Classification"
+        0: 'Booking #', 1: 'Cruise Date', 2: 'Year', 3: 'Month', 4: 'Brand', 5: 'Ship', 6: 'Itinerary', 7: 'Itinerary Category',
+        8: 'Home Port', 9: 'Class', 10: 'Days',
+        11: 'Room #', 12: 'Floor',  13: 'Type', 14: 'Rank', 15: 'Category', 16: 'Grouping',
+        17: 'Cruise Amount', 18: 'Gratuities', 19: 'Room Price',
+        20: 'Room Price Per Day', 21: 'Cruise Amount Per Day',
+        22: 'Airfare', 23: 'Drink Package', 24: 'Total Cruise Amount',
+        25: 'Costco Rebate', 26: 'Shareholder', 27: 'OBC', 28: 'AARP Rebate', 29: 'Total Savings', 30: 'Final Cruise Price',
+        31: 'Ports', 32: 'Excursions', 33: 'Notes', 34: 'Who Went', 35: "Room Classification"
     }
     output_dict = {
         "tab_cruise_data_column_names": tab_cruise_data_column_names,
