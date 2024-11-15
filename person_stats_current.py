@@ -57,6 +57,9 @@ cruise_data_df = cruise_data.rename(columns=tab_cruise_data_column_names)
 # Filter out future cruises
 cruise_data_df['Cruise Date'] = pd.to_datetime(cruise_data_df['Cruise Date'])
 today = pd.Timestamp(datetime.today())
+
+future_cruise = cruise_data_df[cruise_data_df['Cruise Date'] > today].iloc[:1]['Days']
+future_cruise_days = int(future_cruise.iloc[0])
 current_cruises_df = cruise_data_df[cruise_data_df['Cruise Date'] < today]
 
 current_cruises_df = current_cruises_df[['Who Went', 'Booking #', 'Days']]
@@ -91,6 +94,10 @@ pivot_df = group_df.pivot_table(index='Person', values=['Cruises', 'Days', 'Curr
 sorted_pivot_df = pivot_df.sort_values(by='Cruises', ascending=False)
 sorted_pivot_df.reset_index(inplace=True)
 
-# re order the columns
-sorted_pivot_df = sorted_pivot_df[['Person', 'Cruises', 'Days', 'Current VIFP', 'Days Next VIFP', 'Next VIFP Level']]
+sorted_pivot_df['Next Cruise Upgraded'] = (future_cruise_days >= sorted_pivot_df['Days Next VIFP']).astype(int)
+
+# re-order the columns
+sorted_pivot_df = sorted_pivot_df[[
+    'Person', 'Cruises', 'Days', 'Current VIFP', 'Days Next VIFP', 'Next VIFP Level', 'Next Cruise Upgraded'
+]]
 sorted_pivot_df
