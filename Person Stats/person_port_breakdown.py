@@ -1,10 +1,18 @@
-import pandas as pd;import os;import shutil;
-from datetime import datetime;import math;import numpy as np
+import pandas as pd;
+import os;
+import shutil;
+from datetime import datetime;
+import math;
+import numpy as np
+
+if os.name == "nt":
+    from common_functions import *
+
 
 def get_env_vars(copy_file=False):
     if os.name == "nt":
         source_path = "C:\\Users\\rober\\OneDrive\\Documents\\life_events\\Cruise Life.xlsx";
-        destination_path = "C:\\dev\\data_learning\\travel\\Cruise Life.xlsx";
+        destination_path = "/Cruise Life.xlsx";
         if copy_file: shutil.copy(source_path, destination_path);
         return {
             "cruise_data": pd.read_excel(destination_path, sheet_name="cruise_data")
@@ -14,23 +22,6 @@ def get_env_vars(copy_file=False):
             "cruise_data": pd.DataFrame(xl("cruise_data"))
         }
 
-
-def get_column_names():
-    tab_cruise_data_column_names = {
-        0: 'Booking #', 1: 'Cruise Date', 2: 'Year', 3: 'Month', 4: 'Brand', 5: 'Ship', 6: 'Itinerary', 7: 'Itinerary Category',
-        8: 'Home Port', 9: 'Class', 10: 'Days',
-        11: 'Room #', 12: 'Floor',  13: 'Type', 14: 'Rank', 15: 'Category', 16: 'Grouping',
-        17: 'Cruise Amount', 18: 'Gratuities', 19: 'Room Price',
-        20: 'Room Price Per Day', 21: 'Cruise Amount Per Day',
-        22: 'Airfare', 23: 'Drink Package', 24: 'Total Cruise Amount',
-        25: 'Costco Rebate', 26: 'Shareholder', 27: 'OBC', 28: 'AARP Rebate', 29: 'Total Savings', 30: 'Final Cruise Price',
-        31: 'Ports', 32: 'Excursions', 33: 'Notes', 34: 'Who Went', 35: "Room Classification"
-    }
-    output_dict = {
-        "tab_cruise_data_column_names": tab_cruise_data_column_names,
-    }
-
-    return output_dict
 
 copy_file = False
 current_date = datetime.now()
@@ -45,8 +36,8 @@ cruise_data_df = cruise_data.rename(columns=tab_cruise_data_column_names)
 cruise_data_df = cruise_data_df[['Who Went', 'Ports', 'Year']]
 
 # Create lists
-cruise_data_df['Who Went'] = cruise_data_df['Who Went'] .apply(lambda x: x.split(', '))
-cruise_data_df['Ports'] = cruise_data_df['Ports'] .apply(lambda x: x.split(', '))
+cruise_data_df['Who Went'] = cruise_data_df['Who Went'].apply(lambda x: x.split(', '))
+cruise_data_df['Ports'] = cruise_data_df['Ports'].apply(lambda x: x.split(', '))
 # explode the lists
 cruise_data_df = cruise_data_df.explode('Who Went')
 cruise_data_df = cruise_data_df.explode('Ports')
