@@ -48,7 +48,8 @@ def get_pricing_list():
         "room_type_by_floor": ["Type", "Floor"],
         "room_type_by_day": ["Type", "Days"],
         "itinerary_by_port": ["Itinerary Category", "Port"],
-        "itinerary_by_days": ["Itinerary Category", "Days"]
+        "itinerary_by_days": ["Itinerary Category", "Days"],
+        "itinerary_by_month": ["Itinerary Category", "Month"]
     }
     return pricing_agg
 
