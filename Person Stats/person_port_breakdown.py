@@ -12,7 +12,7 @@ if os.name == "nt":
 def get_env_vars(copy_file=False):
     if os.name == "nt":
         source_path = "C:\\Users\\rober\\OneDrive\\Documents\\life_events\\Cruise Life.xlsx";
-        destination_path = "/Cruise Life.xlsx";
+        destination_path = "C:\\dev\\data_learning\\travel\\Cruise Life.xlsx";
         if copy_file: shutil.copy(source_path, destination_path);
         return {
             "cruise_data": pd.read_excel(destination_path, sheet_name="cruise_data")
