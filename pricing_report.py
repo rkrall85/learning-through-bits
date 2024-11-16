@@ -26,21 +26,23 @@ def get_env_vars(copy_file=False):
 def get_report_params():
     if os.name == "nt":
         return {
-            'Itinerary Category': 'Caribbean - Southern',
+            'Itinerary Category': 'Caribbean - Eastern',
             'Port': 'Galveston',
             'Type': 'Balcony',
 
             'Ship': 'Dream',
             'Class': 'Dream',
 
-            'Price': 3500,
-            'OBC': 50,
+            'Price': 4816,
+            'OBC': 150,
             'Costco Rebate': 0,
             'AARP Discount': True,
 
-            'Floor': 9,
-            'Month': 'Jun',
-            'Days': 8
+            'Floor': 10,
+            'Room Category': '8F',
+            'Month': 'Jul',
+            'Days': 8,
+            'Travelers': 4
         }
     else:
         return {
@@ -57,8 +59,10 @@ def get_report_params():
             'AARP Discount': xl("'Pricing Report'!H4"),
 
             'Floor': xl("'Pricing Report'!K1"),
+            'Room Category': '8F',
             'Month': xl("'Pricing Report'!K2"),
             'Days': xl("'Pricing Report'!K3"),
+            'Travelers':  xl("'Pricing Report'!K4")
         }
 
 
@@ -69,18 +73,17 @@ def get_pricing_agg(df, agg):
 
     agg_list = ['min', 'max', 'mean']
 
-    cruise_amount = df.groupby(agg)['Cruise Amount'].agg(agg_list)
-    cruise_amount_minus_savings = df.groupby(agg)['Cruise Amount Minus Savings'].agg(agg_list)
+    #cruise_amount = df.groupby(agg)['Cruise Amount'].agg(agg_list)
+    daily_person_costs = df.groupby(agg)['Daily Person Costs'].agg(agg_list)
 
     pricing_dict = {
-        'cruise_amount': cruise_amount,
-        'cruise_amount_minus_savings': cruise_amount_minus_savings
+        'daily_person_costs': daily_person_costs
     }
 
     return pricing_dict
 
 
-copy_file = True
+copy_file = False
 current_date = datetime.now()
 tab_data = get_env_vars(copy_file)
 cruise_data = tab_data['cruise_data']
@@ -91,9 +94,9 @@ tab_cruise_data_column_names = columns_names['tab_cruise_data_column_names']
 cruise_data_df = cruise_data.rename(columns=tab_cruise_data_column_names)
 cruise_data_df = cruise_data_df[cruise_data_df['Cruise Amount'] != 0]  # remove Robert HS Cruise
 cruise_data_df = cruise_data_df[[
-    'Booking #', 'Month', 'Ship', 'Itinerary', 'Itinerary Category', 'Port', 'Class',
+    'Booking #', 'Month', 'Ship', 'Itinerary', 'Itinerary Category', 'Port', 'Class', 'Room Category',
     'Days', 'Type', 'Floor',
-    'Cruise Amount', 'Cruise Amount Minus Savings'
+    'Daily Person Costs'
 ]]
 
 pricing_list = get_pricing_list()

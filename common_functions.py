@@ -25,11 +25,11 @@ def get_column_names():
         7: 'Itinerary Category',
         8: 'Port', 9: 'Class', 10: 'Days',
         11: 'Room #', 12: 'Floor', 13: 'Type', 14: 'Room Rank', 15: 'Room Category', 16: 'Room Classification',
-        17: 'Cruise Amount', 18: 'Cruise Amount Minus Savings',
-        19: 'Gratuities', 20: 'Airfare', 21: 'Drink Package', 23: 'Total Cruise Amount',
+        17: 'Cruise Amount', 18: 'Cruise Amount Minus Savings', 19: 'Daily Person Costs',
+        20: 'Gratuities', 21: 'Airfare', 22: 'Drink Package', 23: 'Total Cruise Amount',
         24: 'Costco Rebate', 25: 'Shareholder', 26: 'OBC', 27: 'AARP Rebate', 28: 'Total Savings',
         29: 'Final Trip Price',
-        30: 'Ports', 31: 'Excursions', 32: 'Notes', 33: 'Who Went'
+        30: 'Ports', 31: 'Excursions', 32: 'Notes', 33: 'Who Went', 34: 'Who Went Count'
     }
     output_dict = {
         "tab_cruise_data_column_names": tab_cruise_data_column_names,
@@ -46,11 +46,14 @@ def get_pricing_list():
         "room_type_by_month": ["Type", "Month"],
         "room_type_by_floor": ["Type", "Floor"],
         "room_type_by_day": ["Type", "Days"],
-        "room_type_by_class": ["Type", "Class"],
+        "class_by_floor": ["Class", "Floor"],
+        "ship_by_room_category": ["Ship", "Room Category"],
         "room_type_by_port_floor_itinerary": ["Type", "Port", "Floor", "Itinerary Category"],
         "room_type_by_itinerary_by_day": ["Type", "Itinerary Category", "Days"],
         "room_type_by_itinerary_by_month": ["Type", "Itinerary Category", "Month"],
         "room_type_by_month_by_days": ["Type", "Month", "Days"],
+        "room_type_by_ship_by_month_by_floor": ["Type", "Ship", "Month", "Floor"],
+        "room_type_by_ship_by_month": ["Type", "Ship", "Month"],
         "itinerary_by_port": ["Itinerary Category", "Port"],
         "itinerary_by_days": ["Itinerary Category", "Days"],
         "itinerary_by_month": ["Itinerary Category", "Month"],
@@ -58,6 +61,7 @@ def get_pricing_list():
     }
     return pricing_agg
 
+# Room Category	   Room Classification
 
 def get_booking_price_breakdown(booking_dict, pricing_breakdown):
 
@@ -67,6 +71,7 @@ def get_booking_price_breakdown(booking_dict, pricing_breakdown):
     booking_costco_rebate = booking_dict['Costco Rebate']
     booking_aarp_discount = booking_dict['AARP Discount']
     booking_days = booking_dict['Days']
+    booking_travelers = booking_dict['Travelers']
 
     # Get shareholder credits
     if booking_days <= 4:
@@ -82,6 +87,7 @@ def get_booking_price_breakdown(booking_dict, pricing_breakdown):
 
     booking_savings = (booking_shareholder + booking_obc + booking_costco_rebate + aarp_discount)
     booking_price_with_savings = booking_price - booking_savings
+    booking_price_per_person = booking_price_with_savings/booking_days/booking_travelers
 
     booking_pricing = {}
     df_columns = ['Pricing By', 'Pricing Filter', 'Pricing Category', 'Min', 'Mean', 'Max', 'Mock Booking']
@@ -105,7 +111,7 @@ def get_booking_price_breakdown(booking_dict, pricing_breakdown):
         # Convert the list to a tuple (if needed) for pricing_filter
         pricing_filter = tuple(bookings) if len(bookings) > 1 else bookings[0]
 
-        agg_breakdown = ['cruise_amount', 'cruise_amount_minus_savings']
+        agg_breakdown = ['daily_person_costs']
 
         booking_pricing[f'Price By {prim_agg}'] = {}
         for a_id, a in enumerate(agg_breakdown):
@@ -126,12 +132,16 @@ def get_booking_price_breakdown(booking_dict, pricing_breakdown):
                 temp_df['Max'] = filter_data['max']
                 temp_df['Mean'] = filter_data['mean']
 
+                if a == 'daily_person_costs':
+                    temp_df['Pricing Category'] = 'Price/Day/Person'
+                    temp_df['Mock Booking'] = booking_price_per_person
+
+                '''
                 if a == 'cruise_amount':
                     temp_df['Pricing Category'] = 'Cruise Price'
                     temp_df['Mock Booking'] = booking_price
-                elif a == 'cruise_amount_minus_savings':
-                    temp_df['Pricing Category'] = 'Cruise Price Minus Savings'
-                    temp_df['Mock Booking'] = booking_price_with_savings
+                el'''
+
 
                 row_list = temp_df.loc[0, :].values.flatten().tolist()
                 booking_report.loc[booking_row] = row_list
