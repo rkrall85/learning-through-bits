@@ -47,9 +47,13 @@ def get_pricing_list():
         "room_type_by_month": ["Type", "Month"],
         "room_type_by_floor": ["Type", "Floor"],
         "room_type_by_day": ["Type", "Days"],
+        "room_type_by_class": ["Type", "Class"],
+        "room_type_by_itinerary_by_day": ["Type", "Itinerary Category", "Days"],
+        "room_type_by_itinerary_by_month": ["Type", "Itinerary Category", "Month"],
         "itinerary_by_port": ["Itinerary Category", "Port"],
         "itinerary_by_days": ["Itinerary Category", "Days"],
-        "itinerary_by_month": ["Itinerary Category", "Month"]
+        "itinerary_by_month": ["Itinerary Category", "Month"],
+        "itinerary_by_class": ["Itinerary Category", "Class"]
     }
     return pricing_agg
 
@@ -59,8 +63,8 @@ def get_booking_price_breakdown(booking_dict, pricing_breakdown):
     booking_row = 0
     booking_price = booking_dict['Price']
     booking_price_per_day = booking_dict['Price Per Day']
-    booking_room_price = booking_dict['Room Price']
-    booking_room_price_per_day = booking_dict['Room Price Per Day']
+    #booking_room_price = booking_dict['Room Price']
+    #booking_room_price_per_day = booking_dict['Room Price Per Day']
 
     booking_pricing = {}
     df_columns = ['Pricing By', 'Pricing Filter', 'Pricing Category', 'Min', 'Mean', 'Max', 'Mock Booking']
@@ -80,7 +84,7 @@ def get_booking_price_breakdown(booking_dict, pricing_breakdown):
             pricing_filter = prim_booking
 
         agg_breakdown = [
-            'cruise_amount', 'cruise_amount_per_day', 'room_price', 'room_price_per_day'
+            'cruise_amount', 'cruise_amount_per_day'#, 'room_price', 'room_price_per_day'
         ]
 
         booking_pricing[f'Price By {prim_agg}'] = {}
@@ -108,13 +112,14 @@ def get_booking_price_breakdown(booking_dict, pricing_breakdown):
                 elif a == 'cruise_amount_per_day':
                     temp_df['Pricing Category'] = 'Cruise Price Per Day'
                     temp_df['Mock Booking'] = booking_price_per_day
+                '''
                 elif a == 'room_price':
                     temp_df['Pricing Category'] = 'Room Amount'
                     temp_df['Mock Booking'] = booking_room_price
                 elif a == 'room_price_per_day':
                     temp_df['Pricing Category'] = 'Room Amount Per Day'
                     temp_df['Mock Booking'] = booking_room_price_per_day
-
+                '''
                 row_list = temp_df.loc[0, :].values.flatten().tolist()
                 booking_report.loc[booking_row] = row_list
                 booking_row = booking_row + 1

@@ -47,19 +47,15 @@ def get_report_params():
             'Port': xl("'Pricing Report'!B2"),
             'Type': xl("'Pricing Report'!B3"),
 
-            'Ship': xl("'Pricing Report'!E2"),
-            'Class': xl("'Pricing Report'!E3"),
+            'Ship': xl("'Pricing Report'!E1"),
+            'Class': xl("'Pricing Report'!E2"),
 
             'Price': xl("'Pricing Report'!H1"),
-            'Room Price': xl("'Pricing Report'!H2"),
-            'OBC': xl("'Pricing Report'!H3"),
+            'Price Per Day': xl("'Pricing Report'!H2"),
 
-            'Price Per Day': xl("'Pricing Report'!K1"),
-            'Room Price Per Day': xl("'Pricing Report'!K2"),
-
-            'Floor': xl("'Pricing Report'!M1"),
-            'Month': xl("'Pricing Report'!M2"),
-            'Days': xl("'Pricing Report'!M3"),
+            'Floor': xl("'Pricing Report'!K1"),
+            'Month': xl("'Pricing Report'!K2"),
+            'Days': xl("'Pricing Report'!K3"),
         }
 
 
