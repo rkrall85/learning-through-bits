@@ -44,27 +44,34 @@ def get_pricing_list():
         "Ship": ["Ship"],
         "Port": ["Port"],
         "Room Type": ["Room Type"],
+        "Room Classification": ["Room Classification"],
 
         "ship_by_room": ["Ship", "Room Type"],
+        "ship_by_room_classification": ["Ship", "Room Classification"],
         "ship_by_month": ["Ship", "Month"],
         "ship_by_itinerary": ["Ship", "Itinerary Category"],
         "ship_by_room_ports": ["Ship", "Room Type", "Number of Ports"],
 
         "ship_by_month_itinerary": ["Ship", "Month", "Itinerary Category"],
         "ship_by_month_room": ["Ship", "Month", "Room Type"],
+        "ship_by_month_room_classification": ["Ship", "Month", "Room Classification"],
         "ship_by_month_floor_room": ["Ship", "Month", "Floor", 'Room Type'],
 
         "floor_by_room": ["Floor", "Room Type"],
+        "floor_by_room_classification": ["Floor", "Room Classification"],
 
-        "month_by_room": ["Month", "Room Type"],
+        "month_by_room_type": ["Month", "Room Type"],
+        "month_by_room_Classification": ["Month", "Room Classification"],
         "month_by_floor": ["Month", "Floor"],
         "month_by_port": ["Month", "Port"],
         "month_by_room_num_ports": ['Month', 'Room Type', 'Number of Ports'],
 
-        "itinerary_by_ship_room": ["Itinerary Category", "Ship", "Room Type"],
+        "itinerary_by_ship_room_type": ["Itinerary Category", "Ship", "Room Type"],
+        "itinerary_by_ship_room_classification": ["Itinerary Category", "Ship", "Room Classification"],
         "itinerary_by_port": ["Itinerary Category", "Port"],
         "itinerary_by_month": ["Itinerary Category", "Month"],
-        "itinerary_by_room": ["Itinerary Category", "Room Type"],
+        "itinerary_by_room_type": ["Itinerary Category", "Room Type"],
+        "itinerary_by_room_classification": ["Itinerary Category", "Room Classification"],
 
         
         "room_type_by_port_floor_itinerary": ["Room Type", "Port", "Floor", "Itinerary Category"],

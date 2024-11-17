@@ -121,6 +121,14 @@ report_params = get_report_params()
 booking_report_df = get_booking_price_breakdown(booking_dict=report_params, pricing_breakdown=pricing_data)
 booking_report_df = booking_report_df.sort_values(by=['Min', 'Mean', 'Max'], ascending=True)
 booking_report_df['Mock Booking Label'] = booking_report_df['Mock Booking']
+# Further exclude rows where 'Min', 'Mean', 'Max', and 'Mock Booking' are the same
+# Round values to the nearest dollar
+booking_report_df = booking_report_df.round(0)
+booking_report_df = booking_report_df[
+    ~((booking_report_df['Min'] == booking_report_df['Mean']) &
+      (booking_report_df['Mean'] == booking_report_df['Max']) &
+      (booking_report_df['Max'] == booking_report_df['Mock Booking']))
+]
 booking_report_df = booking_report_df.reset_index(drop=True)
 booking_report_df.loc[1:, 'Mock Booking Label'] = ""
 booking_report_df
