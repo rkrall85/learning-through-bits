@@ -31,8 +31,15 @@ def get_column_names():
         29: 'Final Trip Price',
         30: 'Ports', 31: 'Excursions', 32: 'Notes', 33: 'Who Went', 34: 'Who Went Count', 35: 'Number of Ports'
     }
+
+    tab_cpi_column_names = {
+        0: 'Year', 1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May',
+        6: 'Jun', 7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'
+    }
+
     output_dict = {
         "tab_cruise_data_column_names": tab_cruise_data_column_names,
+        "tab_cpi_column_names": tab_cpi_column_names
     }
 
     return output_dict
@@ -108,9 +115,9 @@ def get_booking_price_breakdown(booking_dict, pricing_breakdown):
 
     aarp_discount = 0
     if booking_aarp_discount:
-        aarp_discount = booking_price * .10
+        aarp_discount = booking_price * .08
     else:
-        if booking_costco_rebate >0:
+        if booking_costco_rebate > 0:
             booking_costco_rebate = booking_costco_rebate + (booking_price*.05)
 
     booking_savings = (booking_shareholder + booking_obc + booking_costco_rebate + aarp_discount)
