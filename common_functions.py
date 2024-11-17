@@ -21,15 +21,15 @@ def get_column_names():
     :rtype: dict
     """
     tab_cruise_data_column_names = {
-        0: 'Booking #', 1: 'Cruise Date', 2: 'Year', 3: 'Month', 4: 'Brand', 5: 'Ship', 6: 'Itinerary',
-        7: 'Itinerary Category',
+        0: 'Booking #', 1: 'Cruise Date', 2: 'Year', 3: 'Month', 4: 'Brand', 5: 'Ship',
+        6: 'Itinerary', 7: 'Itinerary Category',
         8: 'Port', 9: 'Class', 10: 'Days',
-        11: 'Room #', 12: 'Floor', 13: 'Type', 14: 'Room Rank', 15: 'Room Category', 16: 'Room Classification',
+        11: 'Room #', 12: 'Floor', 13: 'Room Type', 14: 'Room Rank', 15: 'Room Category', 16: 'Room Classification',
         17: 'Cruise Amount', 18: 'Cruise Amount Minus Savings', 19: 'Daily Person Costs',
         20: 'Gratuities', 21: 'Airfare', 22: 'Drink Package', 23: 'Total Cruise Amount',
         24: 'Costco Rebate', 25: 'Shareholder', 26: 'OBC', 27: 'AARP Rebate', 28: 'Total Savings',
         29: 'Final Trip Price',
-        30: 'Ports', 31: 'Excursions', 32: 'Notes', 33: 'Who Went', 34: 'Who Went Count'
+        30: 'Ports', 31: 'Excursions', 32: 'Notes', 33: 'Who Went', 34: 'Who Went Count', 35: 'Number of Ports'
     }
     output_dict = {
         "tab_cruise_data_column_names": tab_cruise_data_column_names,
@@ -40,24 +40,42 @@ def get_column_names():
 
 def get_pricing_list():
     pricing_agg = {
-        "itinerary": ["Itinerary Category"],
-        "room_type_by_ship": ["Type", "Ship"],
-        "room_type_by_port": ["Type", "Port"],
-        "room_type_by_month": ["Type", "Month"],
-        "room_type_by_floor": ["Type", "Floor"],
-        "room_type_by_day": ["Type", "Days"],
-        "class_by_floor": ["Class", "Floor"],
-        "ship_by_room_category": ["Ship", "Room Category"],
-        "room_type_by_port_floor_itinerary": ["Type", "Port", "Floor", "Itinerary Category"],
-        "room_type_by_itinerary_by_day": ["Type", "Itinerary Category", "Days"],
-        "room_type_by_itinerary_by_month": ["Type", "Itinerary Category", "Month"],
-        "room_type_by_month_by_days": ["Type", "Month", "Days"],
-        "room_type_by_ship_by_month_by_floor": ["Type", "Ship", "Month", "Floor"],
-        "room_type_by_ship_by_month": ["Type", "Ship", "Month"],
+        "Itinerary": ["Itinerary Category"],
+        "Ship": ["Ship"],
+        "Port": ["Port"],
+        "Room Type": ["Room Type"],
+
+        "ship_by_room": ["Ship", "Room Type"],
+        "ship_by_month": ["Ship", "Month"],
+        "ship_by_itinerary": ["Ship", "Itinerary Category"],
+        "ship_by_room_ports": ["Ship", "Room Type", "Number of Ports"],
+
+        "ship_by_month_itinerary": ["Ship", "Month", "Itinerary Category"],
+        "ship_by_month_room": ["Ship", "Month", "Room Type"],
+        "ship_by_month_floor_room": ["Ship", "Month", "Floor", 'Room Type'],
+
+        "floor_by_room": ["Floor", "Room Type"],
+
+        "month_by_room": ["Month", "Room Type"],
+        "month_by_floor": ["Month", "Floor"],
+        "month_by_port": ["Month", "Port"],
+        "month_by_room_num_ports": ['Month', 'Room Type', 'Number of Ports'],
+
+        "itinerary_by_ship_room": ["Itinerary Category", "Ship", "Room Type"],
         "itinerary_by_port": ["Itinerary Category", "Port"],
-        "itinerary_by_days": ["Itinerary Category", "Days"],
         "itinerary_by_month": ["Itinerary Category", "Month"],
-        "itinerary_by_class": ["Itinerary Category", "Class"]
+        "itinerary_by_room": ["Itinerary Category", "Room Type"],
+
+        
+        "room_type_by_port_floor_itinerary": ["Room Type", "Port", "Floor", "Itinerary Category"],
+        "room_type_by_itinerary_by_day": ["Room Type", "Itinerary Category", "Days"],
+        "room_type_by_itinerary_by_month": ["Room Type", "Itinerary Category", "Month"],
+
+        "port_ship_room": ["Port", "Ship", "Room Type"],
+        "port_ship_month": ["Port", "Ship", "Month"],
+        "port_ship_room_month": ["Port",  "Ship", "Room Type", "Month"],
+
+       
     }
     return pricing_agg
 
@@ -84,6 +102,9 @@ def get_booking_price_breakdown(booking_dict, pricing_breakdown):
     aarp_discount = 0
     if booking_aarp_discount:
         aarp_discount = booking_price * .10
+    else:
+        if booking_costco_rebate >0:
+            booking_costco_rebate = booking_costco_rebate + (booking_price*.05)
 
     booking_savings = (booking_shareholder + booking_obc + booking_costco_rebate + aarp_discount)
     booking_price_with_savings = booking_price - booking_savings

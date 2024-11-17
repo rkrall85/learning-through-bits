@@ -28,18 +28,21 @@ def get_report_params():
         return {
             'Itinerary Category': 'Caribbean - Eastern',
             'Port': 'Galveston',
-            'Type': 'Balcony',
+            'Number of Ports': 4,
 
             'Ship': 'Dream',
             'Class': 'Dream',
+
+            'Room Type': 'Balcony',
+            'Room Classification': 'Balcony',
+            'Floor': 10,
+            'Room Category': '8E',
 
             'Price': 4816,
             'OBC': 150,
             'Costco Rebate': 0,
             'AARP Discount': True,
 
-            'Floor': 10,
-            'Room Category': '8F',
             'Month': 'Jul',
             'Days': 8,
             'Travelers': 4
@@ -48,21 +51,24 @@ def get_report_params():
         return {
             'Itinerary Category': xl("'Pricing Report'!B1"),
             'Port': xl("'Pricing Report'!B2"),
-            'Type': xl("'Pricing Report'!B3"),
+            'Number of Ports': xl("'Pricing Report'!B3"),
 
-            'Ship': xl("'Pricing Report'!E1"),
-            'Class': xl("'Pricing Report'!E2"),
+            'Ship': xl("'Pricing Report'!D1"),
+            'Class': xl("'Pricing Report'!D2"),
+
+            'Room Type': xl("'Pricing Report'!F1"),
+            'Room Classification': xl("'Pricing Report'!F2"),
+            'Floor': xl("'Pricing Report'!F3"),
+            'Room Category': xl("'Pricing Report'!F4"),
 
             'Price': xl("'Pricing Report'!H1"),
             'OBC': xl("'Pricing Report'!H2"),
             'Costco Rebate': xl("'Pricing Report'!H3"),
             'AARP Discount': xl("'Pricing Report'!H4"),
 
-            'Floor': xl("'Pricing Report'!K1"),
-            'Room Category': '8F',
-            'Month': xl("'Pricing Report'!K2"),
-            'Days': xl("'Pricing Report'!K3"),
-            'Travelers':  xl("'Pricing Report'!K4")
+            'Month': xl("'Pricing Report'!J1"),
+            'Days': xl("'Pricing Report'!J2"),
+            'Travelers':  xl("'Pricing Report'!J3")
         }
 
 
@@ -83,7 +89,7 @@ def get_pricing_agg(df, agg):
     return pricing_dict
 
 
-copy_file = False
+copy_file = True
 current_date = datetime.now()
 tab_data = get_env_vars(copy_file)
 cruise_data = tab_data['cruise_data']
@@ -94,9 +100,10 @@ tab_cruise_data_column_names = columns_names['tab_cruise_data_column_names']
 cruise_data_df = cruise_data.rename(columns=tab_cruise_data_column_names)
 cruise_data_df = cruise_data_df[cruise_data_df['Cruise Amount'] != 0]  # remove Robert HS Cruise
 cruise_data_df = cruise_data_df[[
-    'Booking #', 'Month', 'Ship', 'Itinerary', 'Itinerary Category', 'Port', 'Class', 'Room Category',
-    'Days', 'Type', 'Floor',
-    'Daily Person Costs'
+    'Booking #', 'Month', 'Ship', 'Itinerary', 'Itinerary Category', 'Port', 'Class',
+    'Room Type', 'Room Category', 'Room Classification',
+    'Days', 'Floor',
+    'Daily Person Costs', 'Number of Ports'
 ]]
 
 pricing_list = get_pricing_list()
@@ -112,4 +119,8 @@ for p in pricing_list:
 
 report_params = get_report_params()
 booking_report_df = get_booking_price_breakdown(booking_dict=report_params, pricing_breakdown=pricing_data)
+booking_report_df = booking_report_df.sort_values(by=['Min', 'Mean', 'Max'], ascending=True)
+booking_report_df['Mock Booking Label'] = booking_report_df['Mock Booking']
+booking_report_df = booking_report_df.reset_index(drop=True)
+booking_report_df.loc[1:, 'Mock Booking Label'] = ""
 booking_report_df
