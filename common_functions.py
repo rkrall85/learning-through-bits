@@ -26,10 +26,10 @@ def get_column_names():
         8: 'Port', 9: 'Class', 10: 'Days',
         11: 'Room #', 12: 'Floor', 13: 'Room Type', 14: 'Room Rank', 15: 'Room Category', 16: 'Room Classification',
         17: 'Cruise Amount', 18: 'Cruise Amount Minus Savings', 19: 'Daily Person Costs',
-        20: 'Gratuities', 21: 'Airfare', 22: 'Drink Package', 23: 'Total Cruise Amount',
-        24: 'Costco Rebate', 25: 'Shareholder', 26: 'OBC', 27: 'AARP Rebate', 28: 'Total Savings',
-        29: 'Final Trip Price',
-        30: 'Ports', 31: 'Excursions', 32: 'Notes', 33: 'Who Went', 34: 'Who Went Count', 35: 'Number of Ports'
+        20: 'Gratuities', 21: 'Airfare', 22: 'Drink Package', 23: 'Drink Package/Day', 24: 'Total Cruise Amount',
+        25: 'Costco Rebate', 26: 'Shareholder', 27: 'OBC', 28: 'AARP Rebate', 29: 'Total Savings',
+        30: 'Final Trip Price',
+        31: 'Ports', 32: 'Excursions', 33: 'Notes', 34: 'Who Went', 35: 'Who Went Count', 36: 'Number of Ports'
     }
 
     tab_cpi_column_names = {
@@ -64,6 +64,10 @@ def get_pricing_list():
         "ship_by_month_room_classification": ["Ship", "Month", "Room Classification"],
         "ship_by_month_floor_room": ["Ship", "Month", "Floor", 'Room Type'],
 
+        "class_by_room_classification": ['Class', 'Room Classification'],
+        "class_by_room_type": ['Ship', 'Room Type'],
+
+
         "floor_by_room": ["Floor", "Room Type"],
         "floor_by_room_classification": ["Floor", "Room Classification"],
 
@@ -93,7 +97,7 @@ def get_pricing_list():
     }
     return pricing_agg
 
-# Room Category	   Room Classification
+
 
 def get_booking_price_breakdown(booking_dict, pricing_breakdown):
 

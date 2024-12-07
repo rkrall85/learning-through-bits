@@ -27,11 +27,14 @@ copy_file = False
 current_date = datetime.now()
 tab_data = get_env_vars(copy_file)
 cruise_data = tab_data['cruise_data']
+today = pd.Timestamp(datetime.today())
+
 # Column names
 columns_names = get_column_names()
 tab_cruise_data_column_names = columns_names['tab_cruise_data_column_names']
 # Data Frames
 cruise_data_df = cruise_data.rename(columns=tab_cruise_data_column_names)
+cruise_data_df = cruise_data_df[cruise_data_df['Cruise Date'] < today]
 
 cruise_data_df = cruise_data_df[['Who Went', 'Ports', 'Year']]
 
