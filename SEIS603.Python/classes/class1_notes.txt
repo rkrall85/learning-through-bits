@@ -1,0 +1,76 @@
+
+
+difference between low and high level: speed
+difference between formal and informal language: one is by a committee and other is not.
+
+
+
+5 common things in a programming language
+1. input            input
+2. output           print
+3. process          data types
+4. conditional      data in memory; user enter his age and based on his age to sell him R rated movie tickets (if statements)
+5. repetition       while loops
+
+Input --> Process --> Output
+
+
+2 modes of python: shell mode and program mode
+  additional modes are interactive python(shell) and jupyter notebooks
+
+
+IDE has
+  1. editor
+    a. color schema
+    b. errors
+    c. syntax highlighting
+  2. debugger
+  3. interpretor
+
+types of modules
+1. data modules
+  a. an object of a python class must first be initiated - an instance
+  b. each instance has
+    - associated state (data members) (turtle or screen)
+    - methods that can be invoked(behaviors)
+  --import turtle
+2. Utility modules
+  a. instance need not be constructed before methods are invoked
+  b. but no individual state is possible
+  --import math
+
+
+types of values
+1. scalars
+  - int, float, bool, etc. that are associated with only a single values
+2. Collections
+  - value is made up a smaller components
+      - str is made of individual chars: 1- char strings
+      - sequential order from left to right
+  - a colleciton data type can be treated as a signle entity
+  or
+  - we can access its component parts using
+    - index operator []
+    - and a integer index
+    example
+      name = "John Smith"
+      print(name[0])
+      print(name[-1])
+
+Collection types
+1. lists
+   - sequential ordered collection of values
+   - names = [1,2,3,4]
+2. Ranges
+  - delivers a sequence of values
+  - range(start, end, step)
+3. repetition / Iteration
+  - is a compound statement that consists of
+      - header line with
+        - the for keyword
+        - a loop variable
+        - the in keyword
+        - a colon
+        - example is a for or while loop
+      - body of 1+ indented statements (a block)
+        - executed for each iteration

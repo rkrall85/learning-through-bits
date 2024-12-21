@@ -1,0 +1,8 @@
+#get status
+git status
+#add all files to commit
+git add --all
+#commit and add comments
+git commit -m "comments"
+#push
+git push origin master

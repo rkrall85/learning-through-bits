@@ -1,0 +1,432 @@
+<Root>
+  <Customer>
+    <CustomerInfo>
+      <OID>2</OID>
+      <Status>5</Status>
+      <ID>00582138</ID>
+      <BrandingPackage>002 AGRIBANK, FCB</BrandingPackage>
+      <Name>73289 - DENMARK AGRICULTURAL</Name>
+      <FIName>02 OFI</FIName>
+      <CustomerDemographic>
+        <Address1>ADDRESS NOT USED</Address1>
+        <State>MN</State>
+        <Country>USA</Country>
+      </CustomerDemographic>
+      <CustUserEmailMandatoryInd>1</CustUserEmailMandatoryInd>
+      <ActivationDate>
+        <Year>2010</Year>
+        <Month>02</Month>
+        <Day>25</Day>
+      </ActivationDate>
+      <E_AC_ACH_CHLD>1</E_AC_ACH_CHLD>
+      <E_AC_ACH_PPD>1</E_AC_ACH_PPD>
+      <E_AC_ACH_PPD_PLUS>1</E_AC_ACH_PPD_PLUS>
+      <E_AC_ACH_CBR>1</E_AC_ACH_CBR>
+      <E_AC_ACH_CCD>1</E_AC_ACH_CCD>
+      <E_AC_ADM_MODIFY_ACCOUNT_NICKNAME>1</E_AC_ADM_MODIFY_ACCOUNT_NICKNAME>
+      <E_AC_CU_ADD>1</E_AC_CU_ADD>
+      <E_AC_CU_DELETE>1</E_AC_CU_DELETE>
+      <E_AC_CU_MODIFY>1</E_AC_CU_MODIFY>
+      <E_AC_CU_VIEW>1</E_AC_CU_VIEW>
+      <E_AC_BR_PREV_DAY>1</E_AC_BR_PREV_DAY>
+      <E_AC_BALANCE_REPORTING_PrevDayImaging>1</E_AC_BALANCE_REPORTING_PrevDayImaging>
+      <E_AC_BR_EXPORT_BAI2>1</E_AC_BR_EXPORT_BAI2>
+      <E_AC_BR_EXPORT_CSV>1</E_AC_BR_EXPORT_CSV>
+      <E_AC_CM_INQU>1</E_AC_CM_INQU>
+      <E_AC_CM_STOP>1</E_AC_CM_STOP>
+      <E_AC_ADM_MT_PROF_NON_REP>1</E_AC_ADM_MT_PROF_NON_REP>
+      <E_AC_ADM_MT_PROF_REP>1</E_AC_ADM_MT_PROF_REP>
+      <E_AC_ADM_MT_PROF_SEMI_REP>1</E_AC_ADM_MT_PROF_SEMI_REP>
+      <E_AC_ADM_MT_PROF_SO>1</E_AC_ADM_MT_PROF_SO>
+      <E_AC_CL_INTRA_DAY>1</E_AC_CL_INTRA_DAY>
+      <E_AC_CL_TRAN_SUMMARY>1</E_AC_CL_TRAN_SUMMARY>
+      <E_AC_MT_INCOMING_WIRE>1</E_AC_MT_INCOMING_WIRE>
+      <E_AC_MT_NON_REP>1</E_AC_MT_NON_REP>
+      <E_AC_MT_REP>1</E_AC_MT_REP>
+      <E_AC_MT_SO>1</E_AC_MT_SO>
+      <E_AC_MT_SEMI_REP>1</E_AC_MT_SEMI_REP>
+      <E_AC_BR_EXPORT_QUICKEN>1</E_AC_BR_EXPORT_QUICKEN>
+      <E_AC_BR_EXPORT_QUICKBOOKS>1</E_AC_BR_EXPORT_QUICKBOOKS>
+      <E_AC_ACH_CCD_PLUS>1</E_AC_ACH_CCD_PLUS>
+      <E_AC_ACH_CTX>1</E_AC_ACH_CTX>
+      <E_AC_ACH_PBR>1</E_AC_ACH_PBR>
+      <E_AC_ACH_CIE>1</E_AC_ACH_CIE>
+      <E_AC_ACH_CIE_PLUS>1</E_AC_ACH_CIE_PLUS>
+      <E_AC_ACH_XCK>1</E_AC_ACH_XCK>
+      <E_AC_ACH_ENR>1</E_AC_ACH_ENR>
+      <E_AC_ACH_WEB>1</E_AC_ACH_WEB>
+      <E_AC_ACH_RCK>1</E_AC_ACH_RCK>
+      <E_AC_ACH_REV>1</E_AC_ACH_REV>
+      <E_AC_ACH_TAX>1</E_AC_ACH_TAX>
+      <E_AC_ACH_TEL>1</E_AC_ACH_TEL>
+      <E_AC_ADM_ACH_PASSTHROUGH>1</E_AC_ADM_ACH_PASSTHROUGH>
+      <E_AC_CL_TRANSACTION>1</E_AC_CL_TRANSACTION>
+      <E_AC_CL_EXTERNAL_ACCOUNT>1</E_AC_CL_EXTERNAL_ACCOUNT>
+      <E_AC_COMMERCIAL_LOANS>1</E_AC_COMMERCIAL_LOANS>
+      <E_AC_CL_INTERNAL_TRANSFER>1</E_AC_CL_INTERNAL_TRANSFER>
+    </CustomerInfo>
+    <ACHSPsCustomers>
+      <CutoffTimeOffsetMinutes>1</CutoffTimeOffsetMinutes>
+      <CutoffTimeOffsetDirection>B</CutoffTimeOffsetDirection>
+      <CumDailyDebitLimitAmt>1</CumDailyDebitLimitAmt>
+      <CumDailyCreditLimitAmt>1</CumDailyCreditLimitAmt>
+      <PaymentDebitLimitAmt>1</PaymentDebitLimitAmt>
+      <PaymentCreditLimitAmt>1</PaymentCreditLimitAmt>
+      <MaxDailyPayments>1</MaxDailyPayments>
+      <ImportSettings>
+        <E_ACH_AUTO_UPDATE_BANK_RT>1</E_ACH_AUTO_UPDATE_BANK_RT>
+        <E_ACH_AUTO_UPDATE_RECEIVER_NAME>1</E_ACH_AUTO_UPDATE_RECEIVER_NAME>
+        <E_ACH_AUTO_UPDATE_RECEIVER_ID>1</E_ACH_AUTO_UPDATE_RECEIVER_ID>
+        <E_ACH_AUTO_UPDATE_RECEIVER_AC_NO>1</E_ACH_AUTO_UPDATE_RECEIVER_AC_NO>
+        <E_ACH_AUTO_UPDATE_BEN_ACTYP_ROLE>1</E_ACH_AUTO_UPDATE_BEN_ACTYP_ROLE>
+      </ImportSettings>
+      <EmailNotifyInd>1</EmailNotifyInd>
+      <OutgoingApprovalType>Single</OutgoingApprovalType>
+      <PTBalancedFileRequirementType>Balanced</PTBalancedFileRequirementType>
+      <UseFIDefaultInd>1</UseFIDefaultInd>
+    </ACHSPsCustomers>
+    <BkReports>
+      <NoOfBankReports>2</NoOfBankReports>
+      <BankReportName>OFI Patronage</BankReportName>
+      <BankReportName>OFI Investment</BankReportName>
+    </BkReports>
+    <DistributionIDs>
+      <ID>0073289</ID>
+      <Description>Customer Number</Description>
+    </DistributionIDs>
+    <Portals>
+      <NoOfPortals>1</NoOfPortals>
+      <PortalName>Statements and Bills</PortalName>
+    </Portals>
+    <MTSPsCustPaymentMeth>
+      <FIRelID>008000002</FIRelID>
+      <PaymentMethod>02PmtMethod</PaymentMethod>
+    </MTSPsCustPaymentMeth>
+    <AlertsSPsCustomers>
+      <BankReportAssignedInd>1</BankReportAssignedInd>
+      <PPDefaultPaymentDecisionAppliedAssignedInd>1</PPDefaultPaymentDecisionAppliedAssignedInd>
+      <PPDefaultDecisionWillBeAppliedAssignedInd>1</PPDefaultDecisionWillBeAppliedAssignedInd>
+      <PPExceptionArrivalAssignedInd>1</PPExceptionArrivalAssignedInd>
+      <PPPendingDecisionApprovalAssignedInd>1</PPPendingDecisionApprovalAssignedInd>
+      <PPIssueApprovalAssignedInd>1</PPIssueApprovalAssignedInd>
+      <EventsDueAssignedInd>1</EventsDueAssignedInd>
+      <EmailInd>1</EmailInd>
+      <PrimaryFIInd>1</PrimaryFIInd>
+      <ACHPassThruAssignedInd>1</ACHPassThruAssignedInd>
+      <ImportsAssignedInd>1</ImportsAssignedInd>
+    </AlertsSPsCustomers>
+    <CLSPsCustomers>
+      <AllowFutureDatedTran>1</AllowFutureDatedTran>
+      <TransactionVerificationPage>1</TransactionVerificationPage>
+      <DetailSummaryRecap>1</DetailSummaryRecap>
+    </CLSPsCustomers>
+    <Account>
+      <AccountInfo>
+        <OID>4</OID>
+        <Status>5</Status>
+        <FIName>02 OFI</FIName>
+        <RelID>008000002</RelID>
+        <AcctType>Customer</AcctType>
+        <Currency>USD</Currency>
+        <Name>Customer</Name>
+        <FixedAccountNumber>73289-N/A</FixedAccountNumber>
+        <ObligorID>73289</ObligorID>
+        <ObligationID>N/A</ObligationID>
+        <E_AC_CL_INTRA_DAY>1</E_AC_CL_INTRA_DAY>
+        <DistributionID>1</DistributionID>
+      </AccountInfo>
+    </Account>
+    <Account>
+      <AccountInfo>
+        <OID>2</OID>
+        <Status>0</Status>
+        <FIName>02 OFI</FIName>
+        <RelID>008000002</RelID>
+        <AcctType>Draft</AcctType>
+        <Currency>USD</Currency>
+        <Name>DRAFT BANKING ACCOUNT</Name>
+        <Num>7010682700</Num>
+        <FixedAccountNumber>7010682700</FixedAccountNumber>
+        <E_AC_BR_PREV_DAY>1</E_AC_BR_PREV_DAY>
+        <E_AC_CM_INQU>1</E_AC_CM_INQU>
+        <E_AC_CM_STOP>1</E_AC_CM_STOP>
+        <E_AC_MT_INCOMING_WIRE>1</E_AC_MT_INCOMING_WIRE>
+        <E_AC_MT_NON_REP_USE_IN_PROFILE>1</E_AC_MT_NON_REP_USE_IN_PROFILE>
+        <E_AC_MT_NON_REP_USE_IN_TRANSFER>1</E_AC_MT_NON_REP_USE_IN_TRANSFER>
+        <E_AC_MT_REP_USE_IN_PROFILE>1</E_AC_MT_REP_USE_IN_PROFILE>
+        <E_AC_MT_REP_USE_IN_TRANSFER>1</E_AC_MT_REP_USE_IN_TRANSFER>
+        <E_AC_MT_SEMI_REP_USE_IN_PROFILE>1</E_AC_MT_SEMI_REP_USE_IN_PROFILE>
+        <E_AC_MT_SEMI_REP_USE_IN_TRANSFER>1</E_AC_MT_SEMI_REP_USE_IN_TRANSFER>
+        <E_AC_MT_SO_USE_IN_PROFILE>1</E_AC_MT_SO_USE_IN_PROFILE>
+        <E_AC_MT_SO_USE_IN_TRANSFER>1</E_AC_MT_SO_USE_IN_TRANSFER>
+        <DistributionID>1</DistributionID>
+      </AccountInfo>
+      <CMSPsAccts>
+        <UseDefaultParamsInd>1</UseDefaultParamsInd>
+      </CMSPsAccts>
+    </Account>
+    <Account>
+      <AccountInfo>
+        <OID>3</OID>
+        <Status>0</Status>
+        <FIName>02 OFI</FIName>
+        <RelID>008000002</RelID>
+        <AcctType>Intermediate Loan</AcctType>
+        <Currency>USD</Currency>
+        <Name>Intermediate Loan</Name>
+        <Nickname>Intermediate Loan</Nickname>
+        <FixedAccountNumber>73289-1224457900</FixedAccountNumber>
+        <ObligorID>73289</ObligorID>
+        <ObligationID>1224457900</ObligationID>
+        <E_AC_CL_INTRA_DAY>1</E_AC_CL_INTRA_DAY>
+        <DistributionID>1</DistributionID>
+        <E_AC_CL_TRANSACTION>1</E_AC_CL_TRANSACTION>
+        <E_AC_COMMERCIAL_LOANS>1</E_AC_COMMERCIAL_LOANS>
+        <E_AC_CL_INTERNAL_TRANSFER>1</E_AC_CL_INTERNAL_TRANSFER>
+      </AccountInfo>
+    </Account>
+    <Account>
+      <AccountInfo>
+        <OID>5</OID>
+        <Status>5</Status>
+        <FIName>02 OFI</FIName>
+        <RelID>008000002</RelID>
+        <AcctType>Intermediate Loan</AcctType>
+        <Currency>USD</Currency>
+        <Name>Intermediate Loan</Name>
+        <FixedAccountNumber>73289-1260846400</FixedAccountNumber>
+        <ObligorID>73289</ObligorID>
+        <ObligationID>1260846400</ObligationID>
+        <E_AC_CL_INTRA_DAY>1</E_AC_CL_INTRA_DAY>
+        <DistributionID>1</DistributionID>
+        <E_AC_CL_TRANSACTION>1</E_AC_CL_TRANSACTION>
+        <E_AC_COMMERCIAL_LOANS>1</E_AC_COMMERCIAL_LOANS>
+        <E_AC_CL_INTERNAL_TRANSFER>1</E_AC_CL_INTERNAL_TRANSFER>
+      </AccountInfo>
+    </Account>
+    <Account>
+      <AccountInfo>
+        <OID>6</OID>
+        <Status>5</Status>
+        <FIName>02 OFI</FIName>
+        <RelID>008000002</RelID>
+        <AcctType>Intermediate Loan</AcctType>
+        <Currency>USD</Currency>
+        <Name>Intermediate Loan</Name>
+        <FixedAccountNumber>73289-1260846500</FixedAccountNumber>
+        <ObligorID>73289</ObligorID>
+        <ObligationID>1260846500</ObligationID>
+        <E_AC_CL_INTRA_DAY>1</E_AC_CL_INTRA_DAY>
+        <DistributionID>1</DistributionID>
+        <E_AC_CL_TRANSACTION>1</E_AC_CL_TRANSACTION>
+        <E_AC_COMMERCIAL_LOANS>1</E_AC_COMMERCIAL_LOANS>
+        <E_AC_CL_INTERNAL_TRANSFER>1</E_AC_CL_INTERNAL_TRANSFER>
+      </AccountInfo>
+    </Account>
+    <Account>
+      <AccountInfo>
+        <OID>7</OID>
+        <Status>5</Status>
+        <FIName>02 OFI</FIName>
+        <RelID>008000002</RelID>
+        <AcctType>Operating Loan</AcctType>
+        <Currency>USD</Currency>
+        <Name>Operating Loan</Name>
+        <FixedAccountNumber>73289-1263501100</FixedAccountNumber>
+        <ObligorID>73289</ObligorID>
+        <ObligationID>1263501100</ObligationID>
+        <E_AC_CL_INTRA_DAY>1</E_AC_CL_INTRA_DAY>
+        <DistributionID>1</DistributionID>
+        <E_AC_CL_TRANSACTION>1</E_AC_CL_TRANSACTION>
+        <E_AC_COMMERCIAL_LOANS>1</E_AC_COMMERCIAL_LOANS>
+        <E_AC_CL_INTERNAL_TRANSFER>1</E_AC_CL_INTERNAL_TRANSFER>
+      </AccountInfo>
+    </Account>
+    <Account>
+      <AccountInfo>
+        <OID>8</OID>
+        <Status>5</Status>
+        <FIName>02 OFI</FIName>
+        <RelID>008000002</RelID>
+        <AcctType>Operating Loan</AcctType>
+        <Currency>USD</Currency>
+        <Name>Operating Loan</Name>
+        <FixedAccountNumber>73289-1267947600</FixedAccountNumber>
+        <ObligorID>73289</ObligorID>
+        <ObligationID>1267947600</ObligationID>
+        <E_AC_CL_INTRA_DAY>1</E_AC_CL_INTRA_DAY>
+        <DistributionID>1</DistributionID>
+        <E_AC_CL_TRANSACTION>1</E_AC_CL_TRANSACTION>
+        <E_AC_COMMERCIAL_LOANS>1</E_AC_COMMERCIAL_LOANS>
+        <E_AC_CL_INTERNAL_TRANSFER>1</E_AC_CL_INTERNAL_TRANSFER>
+      </AccountInfo>
+    </Account>
+    <Account>
+      <AccountInfo>
+        <OID>9</OID>
+        <Status>5</Status>
+        <FIName>02 OFI</FIName>
+        <RelID>008000002</RelID>
+        <AcctType>Operating Loan</AcctType>
+        <Currency>USD</Currency>
+        <Name>Operating Loan</Name>
+        <FixedAccountNumber>73289-1291497800</FixedAccountNumber>
+        <ObligorID>73289</ObligorID>
+        <ObligationID>1291497800</ObligationID>
+        <E_AC_CL_INTRA_DAY>1</E_AC_CL_INTRA_DAY>
+        <DistributionID>1</DistributionID>
+        <E_AC_CL_TRANSACTION>1</E_AC_CL_TRANSACTION>
+        <E_AC_COMMERCIAL_LOANS>1</E_AC_COMMERCIAL_LOANS>
+        <E_AC_CL_INTERNAL_TRANSFER>1</E_AC_CL_INTERNAL_TRANSFER>
+      </AccountInfo>
+    </Account>
+    <Account>
+      <AccountInfo>
+        <OID>10</OID>
+        <Status>5</Status>
+        <FIName>02 OFI</FIName>
+        <RelID>008000002</RelID>
+        <AcctType>Operating Loan</AcctType>
+        <Currency>USD</Currency>
+        <Name>Operating Loan</Name>
+        <FixedAccountNumber>73289-7010682700</FixedAccountNumber>
+        <ObligorID>73289</ObligorID>
+        <ObligationID>7010682700</ObligationID>
+        <E_AC_CL_INTRA_DAY>1</E_AC_CL_INTRA_DAY>
+        <DistributionID>1</DistributionID>
+        <E_AC_CL_TRANSACTION>1</E_AC_CL_TRANSACTION>
+        <E_AC_COMMERCIAL_LOANS>1</E_AC_COMMERCIAL_LOANS>
+        <E_AC_CL_INTERNAL_TRANSFER>1</E_AC_CL_INTERNAL_TRANSFER>
+      </AccountInfo>
+    </Account>
+    <User>
+      <UserInfo>
+        <OID>2</OID>
+        <Status>5</Status>
+        <FirstName>PRIMARY</FirstName>
+        <LastName>USER</LastName>
+        <LoginID>kimtess07</LoginID>
+        <Address1>ADDRESS NOT USED</Address1>
+        <State>MN</State>
+        <ProvinceCountry>USA</ProvinceCountry>
+        <Email>KIMK@DENMARKSTATE.COM</Email>
+        <ActivationDate>
+          <Year>2010</Year>
+          <Month>02</Month>
+          <Day>25</Day>
+        </ActivationDate>
+      </UserInfo>
+      <UserAdministration>
+        <E_AC_ADM_MODIFY_ACCOUNT_NICKNAME>1</E_AC_ADM_MODIFY_ACCOUNT_NICKNAME>
+        <E_AC_CU_ADD_OTHERS>1</E_AC_CU_ADD_OTHERS>
+        <E_AC_CU_DELETE_OTHERS>1</E_AC_CU_DELETE_OTHERS>
+        <E_AC_CU_MODIFY_OTHERS_CHG_CONTACT>1</E_AC_CU_MODIFY_OTHERS_CHG_CONTACT>
+        <E_AC_CU_MODIFY_OTHERS_CHG_PASSWORD>1</E_AC_CU_MODIFY_OTHERS_CHG_PASSWORD>
+        <E_AC_CU_MODIFY_OTHERS_CHG_PERMS>1</E_AC_CU_MODIFY_OTHERS_CHG_PERMS>
+        <E_AC_CU_MODIFY_OTHERS_CHG_STATUS>1</E_AC_CU_MODIFY_OTHERS_CHG_STATUS>
+        <E_AC_CU_VIEW_OTHERS>1</E_AC_CU_VIEW_OTHERS>
+        <E_AC_CU_VIEW_SELF>1</E_AC_CU_VIEW_SELF>
+        <E_AC_ADM_BR_EXPORT_BAI2>1</E_AC_ADM_BR_EXPORT_BAI2>
+        <E_AC_ADM_BR_EXPORT_CSV>1</E_AC_ADM_BR_EXPORT_CSV>
+        <E_AC_ADM_BR_EXPORT_QUICKEN>1</E_AC_ADM_BR_EXPORT_QUICKEN>
+        <E_AC_ADM_BR_EXPORT_QUICKBOOKS>1</E_AC_ADM_BR_EXPORT_QUICKBOOKS>
+        <E_AC_CU_RD_DELETE_OTHERS>1</E_AC_CU_RD_DELETE_OTHERS>
+        <E_AC_CL_EXTERNAL_ACCOUNT_ADD>1</E_AC_CL_EXTERNAL_ACCOUNT_ADD>
+        <E_AC_CL_EXTERNAL_ACCOUNT_MODIFY>1</E_AC_CL_EXTERNAL_ACCOUNT_MODIFY>
+        <E_AC_CL_EXTERNAL_ACCOUNT_VIEW>1</E_AC_CL_EXTERNAL_ACCOUNT_VIEW>
+        <E_AC_CL_EXTERNAL_ACCOUNT_DELETE>1</E_AC_CL_EXTERNAL_ACCOUNT_DELETE>
+      </UserAdministration>
+      <BRUserAccts>
+        <Acct>7010682700</Acct>
+        <FIRelID>008000002</FIRelID>
+        <AcctType>Draft</AcctType>
+      </BRUserAccts>
+      <BKRptUserDistIDs>
+        <ID>0073289</ID>
+        <ReportName>OFI Investment</ReportName>
+      </BKRptUserDistIDs>
+      <BKRptUserDistIDs>
+        <ID>0073289</ID>
+        <ReportName>OFI Patronage</ReportName>
+      </BKRptUserDistIDs>
+      <CLUserAccts>
+        <Acct>73289-N/A</Acct>
+        <E_AC_CL_ID_SUMMARY>1</E_AC_CL_ID_SUMMARY>
+        <E_AC_CL_ID_DETAIL>1</E_AC_CL_ID_DETAIL>
+        <FIRelID>008000002</FIRelID>
+        <AcctType>Customer</AcctType>
+      </CLUserAccts>
+      <CLUserAccts>
+        <Acct>73289-1224457900</Acct>
+        <E_AC_CL_ID_SUMMARY>1</E_AC_CL_ID_SUMMARY>
+        <E_AC_CL_ID_DETAIL>1</E_AC_CL_ID_DETAIL>
+        <FIRelID>008000002</FIRelID>
+        <AcctType>Intermediate Loan</AcctType>
+        <E_AC_COMMERCIAL_LOANS>1</E_AC_COMMERCIAL_LOANS>
+      </CLUserAccts>
+      <CLUserAccts>
+        <Acct>73289-1260846400</Acct>
+        <E_AC_CL_ID_SUMMARY>1</E_AC_CL_ID_SUMMARY>
+        <E_AC_CL_ID_DETAIL>1</E_AC_CL_ID_DETAIL>
+        <FIRelID>008000002</FIRelID>
+        <AcctType>Intermediate Loan</AcctType>
+        <E_AC_COMMERCIAL_LOANS>1</E_AC_COMMERCIAL_LOANS>
+      </CLUserAccts>
+      <CLUserAccts>
+        <Acct>73289-1260846500</Acct>
+        <E_AC_CL_ID_SUMMARY>1</E_AC_CL_ID_SUMMARY>
+        <E_AC_CL_ID_DETAIL>1</E_AC_CL_ID_DETAIL>
+        <FIRelID>008000002</FIRelID>
+        <AcctType>Intermediate Loan</AcctType>
+        <E_AC_COMMERCIAL_LOANS>1</E_AC_COMMERCIAL_LOANS>
+      </CLUserAccts>
+      <CLUserAccts>
+        <Acct>73289-1263501100</Acct>
+        <E_AC_CL_ID_SUMMARY>1</E_AC_CL_ID_SUMMARY>
+        <E_AC_CL_ID_DETAIL>1</E_AC_CL_ID_DETAIL>
+        <FIRelID>008000002</FIRelID>
+        <AcctType>Operating Loan</AcctType>
+        <E_AC_COMMERCIAL_LOANS>1</E_AC_COMMERCIAL_LOANS>
+      </CLUserAccts>
+      <CLUserAccts>
+        <Acct>73289-1267947600</Acct>
+        <E_AC_CL_ID_SUMMARY>1</E_AC_CL_ID_SUMMARY>
+        <E_AC_CL_ID_DETAIL>1</E_AC_CL_ID_DETAIL>
+        <FIRelID>008000002</FIRelID>
+        <AcctType>Operating Loan</AcctType>
+        <E_AC_COMMERCIAL_LOANS>1</E_AC_COMMERCIAL_LOANS>
+      </CLUserAccts>
+      <CLUserAccts>
+        <Acct>73289-1291497800</Acct>
+        <E_AC_CL_ID_SUMMARY>1</E_AC_CL_ID_SUMMARY>
+        <E_AC_CL_ID_DETAIL>1</E_AC_CL_ID_DETAIL>
+        <FIRelID>008000002</FIRelID>
+        <AcctType>Operating Loan</AcctType>
+        <E_AC_COMMERCIAL_LOANS>1</E_AC_COMMERCIAL_LOANS>
+      </CLUserAccts>
+      <CLUserAccts>
+        <Acct>73289-7010682700</Acct>
+        <E_AC_CL_ID_SUMMARY>1</E_AC_CL_ID_SUMMARY>
+        <E_AC_CL_ID_DETAIL>1</E_AC_CL_ID_DETAIL>
+        <FIRelID>008000002</FIRelID>
+        <AcctType>Operating Loan</AcctType>
+        <E_AC_COMMERCIAL_LOANS>1</E_AC_COMMERCIAL_LOANS>
+      </CLUserAccts>
+      <MTUserAccts>
+        <Acct>7010682700</Acct>
+        <FIRelID>008000002</FIRelID>
+        <AcctType>Draft</AcctType>
+      </MTUserAccts>
+      <PTUserAssignment>
+        <PortalName>Statements and Bills</PortalName>
+      </PTUserAssignment>
+      <CMUserAccts>
+        <Acct>7010682700</Acct>
+        <E_AC_CM_INQU_ADD>1</E_AC_CM_INQU_ADD>
+        <E_AC_CM_INQU_VIEW>1</E_AC_CM_INQU_VIEW>
+        <FIRelID>008000002</FIRelID>
+        <AcctType>Draft</AcctType>
+      </CMUserAccts>
+    </User>
+  </Customer>
+</Root>

@@ -1,0 +1,25 @@
+Problem 1: 25 points
+
+Design and implement a program that prints the number of odd, even, and 0 digits in an integer value that it reads from the keyboard.
+
+If the user inputs the integer 120675, then your program should print out: odd: 3, even: 2, and zero: 1
+
+Note: solve any 2 out of the 3 questions. You will not get extra credit if you solve all 3.
+
+Problem 2: 25 points
+
+Write a program that prompts for the numerator and denominator of a fraction as integers, and then prints the decimal equivalent of the fraction. Print only up to 2 decimal places in the fractional part. Ensure that your program does not fail if the user enters a denominator of 0.
+
+If the user enters a numerator of 1 and a denominator of 3, then your program would print 0.33.
+
+Note: solve any 2 out of the 3 questions. You will not get extra credit if you solve all 3.
+
+Problem 3: 25 points
+
+Write a program that prompts for the user's first name and last name (separately). Then print a string composed of the first letter of the user's first name followed by the first five characters of the user's last name followed by a random number in the range 10 to 99. Ensure that your program does not fail if the user enters a last name that is less than 5 letters long.
+
+Such algorithms are sometimes used to generate usernames for new computer accounts.
+
+If the user were to enter John Smith, then your program would generate an username in the range jsmith10 to jsmith99.
+
+Note: solve any 2 out of the 3 questions. You will not get extra credit if you solve all 3.
