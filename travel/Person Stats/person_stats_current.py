@@ -2,11 +2,9 @@ import pandas as pd;
 import os;
 import shutil;
 from datetime import datetime;
-import math;
-import numpy as np
 
 if os.name == "nt":
-    from common_functions import *
+    from travel.common_functions import *
 
 
 def get_env_vars(copy_file=False):
