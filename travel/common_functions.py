@@ -1,5 +1,5 @@
-import os;
-import pandas as pd;
+import os
+import pandas as pd
 
 
 def get_level_info(days, levels, names):
@@ -118,6 +118,7 @@ def get_booking_price_breakdown(booking_dict, pricing_breakdown):
         booking_shareholder = 250
 
     aarp_discount = 0
+    # ticket(5) add logic after 12/21/24 then its 5%; after 07/05/2024 its 8% otherwise 10%
     if booking_aarp_discount:
         aarp_discount = booking_price * .08
     else:
