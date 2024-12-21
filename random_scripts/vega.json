@@ -1,0 +1,107 @@
+{
+  "axes": [],
+  "data": [
+    {
+      "name": "table",
+      "values": [
+        {
+          "x": "ARG",
+          "y": 0.254
+        },
+        {
+          "x": "ARM",
+          "y": 0.3456
+        },
+        {
+          "x": "AUS",
+          "y": 0.26
+        },
+        {
+          "x": "AUT",
+          "y": 0.357
+        }
+      ]
+    },
+    {
+      "format": {
+        "feature": "world-countries",
+        "type": "topojson"
+      },
+      "name": "countries",
+      "transform": [
+        {
+          "as": "value",
+          "default": "noval",
+          "key": "data.id",
+          "type": "zip",
+          "with": "table",
+          "withKey": "data.x"
+        },
+        {
+          "test": "d.path!='noval' && d.value!='noval'",
+          "type": "filter"
+        },
+        {
+          "projection": "winkel3",
+          "scale": 1100,
+          "translate": [
+            480.0,
+            250.0
+          ],
+          "type": "geopath",
+          "value": "data"
+        }
+      ],
+      "url": "world-countries.topo.json"
+    }
+  ],
+  "height": 500,
+  "legends": [],
+  "marks": [
+    {
+      "from": {
+        "data": "countries"
+      },
+      "properties": {
+        "enter": {
+          "path": {
+            "field": "path"
+          },
+          "stroke": {
+            "value": "#000000"
+          }
+        },
+        "update": {
+          "fill": {
+            "field": "value.data.y",
+            "scale": "color"
+          }
+        }
+      },
+      "type": "path"
+    }
+  ],
+  "padding": "auto",
+  "scales": [
+    {
+      "domain": [
+        0.254,
+        0.35529
+      ],
+      "name": "color",
+      "range": [
+        "#f7fcf0",
+        "#e0f3db",
+        "#ccebc5",
+        "#a8ddb5",
+        "#7bccc4",
+        "#4eb3d3",
+        "#2b8cbe",
+        "#0868ac",
+        "#084081"
+      ],
+      "type": "quantize"
+    }
+  ],
+  "width": 960
+}

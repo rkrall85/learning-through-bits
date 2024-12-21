@@ -1,0 +1,8 @@
+Write a program that reads a list directly from the user,
+then removes duplicate top-level elements in it and prints out the resulting list.
+You may not use the Python set type to do this problem.
+
+Hint: Use eval(input("input list: ")) to read a list from the user.
+eval(s) is a built-in Python function which evaluates its str argument s,
+converting it to the proper Python type and returning this value.
+(It's the Python interpreter as a built-in function.)

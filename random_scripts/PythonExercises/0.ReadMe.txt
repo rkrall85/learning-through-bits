@@ -1,0 +1,2 @@
+The following examples are created from the following site:
+https://www.ynonperek.com/2017/09/21/python-exercises/

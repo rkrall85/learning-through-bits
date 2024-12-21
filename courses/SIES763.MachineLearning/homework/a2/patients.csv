@@ -1,0 +1,101 @@
+Age,Diastolic,Gender,Height,LastName,Location,SelfAssessedHealthStatus,Smoker,Systolic,Weight
+38,93,'Male',71,'Smith','County General Hospital','Excellent',1,124,176
+43,77,'Male',69,'Johnson','VA Hospital','Fair',0,109,163
+38,83,'Female',64,'Williams','St. Mary's Medical Center','Good',0,125,131
+40,75,'Female',67,'Jones','VA Hospital','Fair',0,117,133
+49,80,'Female',64,'Brown','County General Hospital','Good',0,122,119
+46,70,'Female',68,'Davis','St. Mary's Medical Center','Good',0,121,142
+33,88,'Female',64,'Miller','VA Hospital','Good',1,130,142
+40,82,'Male',68,'Wilson','VA Hospital','Good',0,115,180
+28,78,'Male',68,'Moore','St. Mary's Medical Center','Excellent',0,115,183
+31,86,'Female',66,'Taylor','County General Hospital','Excellent',0,118,132
+45,77,'Female',68,'Anderson','County General Hospital','Excellent',0,114,128
+42,68,'Female',66,'Thomas','St. Mary's Medical Center','Poor',0,115,137
+25,74,'Male',71,'Jackson','VA Hospital','Poor',0,127,174
+39,95,'Male',72,'White','VA Hospital','Excellent',1,130,202
+36,79,'Female',65,'Harris','St. Mary's Medical Center','Good',0,114,129
+48,92,'Male',71,'Martin','VA Hospital','Good',1,130,181
+32,95,'Male',69,'Thompson','St. Mary's Medical Center','Excellent',1,124,191
+27,79,'Female',69,'Garcia','VA Hospital','Fair',1,123,131
+37,77,'Male',70,'Martinez','County General Hospital','Good',0,119,179
+50,76,'Male',68,'Robinson','County General Hospital','Good',0,125,172
+48,75,'Female',65,'Clark','VA Hospital','Excellent',0,121,133
+39,79,'Female',64,'Rodriguez','VA Hospital','Fair',0,123,117
+41,88,'Female',62,'Lewis','VA Hospital','Fair',0,114,137
+44,90,'Female',66,'Lee','County General Hospital','Fair',1,128,146
+28,96,'Female',65,'Walker','County General Hospital','Good',1,129,123
+25,77,'Male',70,'Hall','VA Hospital','Poor',0,114,189
+39,80,'Female',63,'Allen','VA Hospital','Excellent',0,113,143
+25,76,'Female',63,'Young','County General Hospital','Good',0,125,114
+36,83,'Male',68,'Hernandez','County General Hospital','Poor',0,120,166
+30,89,'Male',67,'King','County General Hospital','Excellent',1,127,186
+45,92,'Female',70,'Wright','VA Hospital','Excellent',1,134,126
+40,83,'Female',66,'Lopez','VA Hospital','Poor',0,121,137
+25,80,'Female',64,'Hill','St. Mary's Medical Center','Excellent',0,115,138
+47,84,'Male',70,'Scott','St. Mary's Medical Center','Excellent',0,127,187
+44,92,'Male',71,'Green','County General Hospital','Good',0,121,193
+48,83,'Female',66,'Adams','VA Hospital','Excellent',0,127,137
+44,90,'Male',71,'Baker','VA Hospital','Good',1,136,192
+35,85,'Female',66,'Gonzalez','St. Mary's Medical Center','Fair',0,117,118
+33,90,'Male',66,'Nelson','St. Mary's Medical Center','Good',1,124,180
+38,74,'Female',63,'Carter','St. Mary's Medical Center','Good',0,120,128
+39,92,'Male',71,'Mitchell','County General Hospital','Fair',1,128,164
+44,80,'Male',69,'Perez','VA Hospital','Excellent',0,116,183
+44,89,'Male',70,'Roberts','VA Hospital','Good',1,132,169
+37,96,'Male',70,'Turner','VA Hospital','Excellent',1,137,194
+45,89,'Male',67,'Phillips','VA Hospital','Good',0,117,172
+37,77,'Female',65,'Campbell','County General Hospital','Fair',0,116,135
+30,81,'Male',68,'Parker','VA Hospital','Poor',0,119,182
+39,76,'Female',62,'Evans','County General Hospital','Good',0,123,121
+42,83,'Male',70,'Edwards','County General Hospital','Excellent',0,116,158
+42,78,'Male',67,'Collins','County General Hospital','Good',1,124,179
+49,95,'Male',68,'Stewart','County General Hospital','Poor',1,129,170
+44,91,'Female',62,'Sanchez','St. Mary's Medical Center','Good',1,130,136
+43,91,'Female',64,'Morris','County General Hospital','Poor',1,132,135
+47,86,'Female',66,'Rogers','VA Hospital','Excellent',0,117,147
+50,89,'Male',72,'Reed','VA Hospital','Excellent',1,129,186
+38,79,'Female',63,'Cook','VA Hospital','Excellent',0,118,124
+41,74,'Female',66,'Morgan','St. Mary's Medical Center','Good',0,120,134
+45,82,'Male',70,'Bell','St. Mary's Medical Center','Good',1,138,170
+36,76,'Male',71,'Murphy','VA Hospital','Good',0,117,180
+38,81,'Female',68,'Bailey','St. Mary's Medical Center','Good',0,113,130
+29,77,'Female',63,'Rivera','County General Hospital','Excellent',0,122,130
+28,73,'Female',65,'Cooper','VA Hospital','Good',0,115,127
+30,85,'Female',67,'Richardson','County General Hospital','Excellent',0,120,141
+28,76,'Female',66,'Cox','County General Hospital','Good',0,117,111
+29,80,'Female',68,'Howard','VA Hospital','Excellent',0,123,134
+36,80,'Male',71,'Ward','St. Mary's Medical Center','Good',0,123,189
+45,79,'Female',70,'Torres','County General Hospital','Excellent',0,119,137
+32,82,'Female',60,'Peterson','County General Hospital','Excellent',0,110,136
+31,79,'Female',64,'Gray','VA Hospital','Excellent',0,121,130
+48,82,'Female',64,'Ramirez','County General Hospital','Excellent',1,138,137
+25,75,'Male',66,'James','County General Hospital','Good',0,125,186
+40,91,'Female',64,'Watson','VA Hospital','Fair',1,122,127
+39,74,'Male',72,'Brooks','St. Mary's Medical Center','Excellent',0,120,176
+41,78,'Female',65,'Kelly','St. Mary's Medical Center','Poor',0,117,127
+33,85,'Female',67,'Sanders','St. Mary's Medical Center','Excellent',1,125,115
+31,84,'Male',72,'Price','VA Hospital','Fair',1,124,178
+35,75,'Female',64,'Bennett','County General Hospital','Fair',0,121,131
+32,78,'Male',68,'Wood','St. Mary's Medical Center','Poor',0,118,183
+42,81,'Male',66,'Barnes','County General Hospital','Excellent',0,120,194
+48,79,'Female',64,'Ross','VA Hospital','Good',0,118,126
+34,85,'Male',68,'Henderson','St. Mary's Medical Center','Good',0,118,186
+39,79,'Male',69,'Coleman','VA Hospital','Excellent',0,122,188
+28,82,'Male',69,'Jenkins','County General Hospital','Good',1,134,189
+29,80,'Female',64,'Perry','St. Mary's Medical Center','Good',0,131,120
+32,80,'Female',63,'Powell','VA Hospital','Excellent',0,113,132
+39,92,'Male',68,'Long','County General Hospital','Good',1,125,182
+37,92,'Female',65,'Patterson','County General Hospital','Poor',1,135,120
+49,96,'Female',63,'Hughes','County General Hospital','Good',1,128,123
+31,87,'Female',66,'Flores','VA Hospital','Good',1,123,141
+37,81,'Female',65,'Washington','St. Mary's Medical Center','Good',0,122,129
+38,90,'Male',68,'Butler','County General Hospital','Excellent',1,138,184
+45,77,'Male',71,'Simmons','VA Hospital','Excellent',0,124,181
+30,91,'Female',70,'Foster','St. Mary's Medical Center','Fair',0,130,124
+48,79,'Male',71,'Gonzales','County General Hospital','Good',0,123,174
+48,73,'Female',66,'Bryant','County General Hospital','Excellent',0,129,134
+25,99,'Male',69,'Alexander','County General Hospital','Good',1,128,171
+44,92,'Male',69,'Russell','VA Hospital','Good',1,124,188
+49,74,'Male',70,'Griffin','County General Hospital','Fair',0,119,186
+45,93,'Male',68,'Diaz','County General Hospital','Good',1,136,172
+48,86,'Male',66,'Hayes','County General Hospital','Fair',0,114,177
