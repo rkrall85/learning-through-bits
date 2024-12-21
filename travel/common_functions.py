@@ -1,5 +1,5 @@
-import os;
-import pandas as pd;
+import os
+import pandas as pd
 
 
 def get_level_info(days, levels, names):

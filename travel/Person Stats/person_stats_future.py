@@ -1,5 +1,6 @@
-import pandas as pd;import os;import shutil;
-from datetime import datetime;
+import pandas as pd
+import os;import shutil
+from datetime import datetime
 
 if os.name == "nt":
     from travel.common_functions import *
@@ -7,16 +8,16 @@ if os.name == "nt":
 
 def get_env_vars(copy_file=False):
     if os.name == "nt":
-        source_path = "C:\\Users\\rober\\OneDrive\\Documents\\life_events\\Cruise Life.xlsx";
-        destination_path = "C:\\dev\\data_learning\\travel\\Cruise Life.xlsx";
+        file_name = "Cruise Life.xlsx"
+        cwd = os.getcwd()
+        home_dir = os.path.expanduser('~')
+        one_drive_relative_path = f'OneDrive\\Documents\\life_events\\{file_name}'
+        source_path = os.path.join(home_dir, one_drive_relative_path)
+        destination_path = os.path.join(cwd,file_name);
         if copy_file: shutil.copy(source_path, destination_path);
-        return {
-            "cruise_data": pd.read_excel(destination_path, sheet_name="cruise_data")
-        }
+        return {"cruise_data": pd.read_excel(destination_path, sheet_name="cruise_data")}
     else:
-        return {
-            "cruise_data": pd.DataFrame(xl("cruise_data"))
-        }
+        return {"cruise_data": pd.DataFrame(xl("cruise_data"))}
 
 
 copy_file = False
