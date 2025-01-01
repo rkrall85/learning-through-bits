@@ -1,5 +1,7 @@
 
 
+import pandas as pd
+
 def get_column_names():
     """
     Purpose: Getting column names from sheets \n
@@ -8,37 +10,67 @@ def get_column_names():
     :return: dict of column names
     :rtype: dict
     """
-    tab_yearly_contributions = {
-        0: 'Year', 1: 'Self Contributions', 2: 'Income', 3: 'Self Investing', 4: 'Total Contributions', 5: 'Total %',
-        6: '15% Goal', 7: 'How Much Behind',
-        8: 'Empty',
-        9: 'Owner', 10: 'Year', 11: 'Type', 12: 'Employee Contributions', 13: 'Employer Contributions',
-        14: 'Total Contributions', 15: 'Employee Limit',
-        16: 'Empty',
-        17: 'Company', 18: 'Employer', 19: 'Owner', 20: 'Year', 21: 'Type', 22: 'Employee Contributions',
-        23: 'Employer Contributions', 24: 'Total Contributions', 25: 'Roll Over'
+    balance_columns_names = {
+        0: 'Company', 1: 'Employer', 2: 'Owner', 3: 'Type',
+        4: 'Date', 5: 'Month', 6: 'Quarter', 7: 'Year', 8: 'YQ Key',
+        9: 'Balance', 10: 'Contributions - Employee', 11: 'Contributions - Employer', 12: 'Total Contributions',
+        13: 'Roll Over', 14: '401k Flag', 15: 'Fire Flag', 16: 'HSA Flag', 17: 'End of Year Flag', 18: 'Total Retirement Flag'
     }
-    yearly_by_type = [
-        'Owner', 'Year.1', 'Type', 'Employee Contributions', 'Employer Contributions',
-        'Total Contributions.1', 'Employee Limit'
-    ]
-    yearly_by_company_by_type = ['Company', 'Employer', 'Owner.1', 'Year.2', 'Type.1', 'Total Contributions.2', 'Roll Over']
 
-    tab_yearly_balances = {
-        0: 'Company', 1: 'Employer', 2: 'Owner', 3: 'Type', 4: 'Year', 5: 'Balance',
-        6: '401k Flag', 7: 'Fire Flag', 8: 'HSA Flag', 9: 'Total Retirement Flag'
-    }
-    yearly_balance = ['Company', 'Employer', 'Owner', 'Type', 'Year', 'Balance']
+    pk = ['Company', 'Employer', 'Owner', 'Type']
 
-    pk_by_type = ['Company', 'Employer', 'Owner', 'Type', 'Year']
+    balances = pk + ['Year', 'Balance']
+    contributions = pk + ['Year', 'Total Contributions', 'Roll Over']
 
     output_dict = {
-        "tab_yearly_contributions": tab_yearly_contributions,
-        "yearly_by_type": yearly_by_type,
-        "yearly_by_company_by_type": yearly_by_company_by_type,
-        "tab_yearly_balances": tab_yearly_balances,
-        "yearly_balance": yearly_balance,
-        "pk_by_type": pk_by_type
+        "balance_columns_names": balance_columns_names,
+        "pk": pk,
+        "balances": balances,
+        "contributions": contributions
     }
 
     return output_dict
+
+
+
+
+
+def get_pivoted_data(yearly_summary, heat_map_ordering):
+    """
+    Purpose: This will pivot the dataframe data to get data setup for heat map \n
+    Created By: Robert Krall \n
+    Created On: 12/26/2024 \n
+    :param yearly_summary: dataframe of yearly summary
+    :type yearly_summary: dataframe
+    :return:
+    """
+    pivot_ror = yearly_summary.pivot(index='full_investment_name', columns='Year', values='ROR')
+    pivot_gains = yearly_summary.pivot(index='full_investment_name', columns='Year', values='Gains')
+    years_list = sorted(yearly_summary['Year'].unique(), reverse=True)
+
+    update_ror = order_pivot_data(pivot_ror, heat_map_ordering, years_list)
+    updated_gains = order_pivot_data(pivot_gains, heat_map_ordering, years_list)
+
+    return update_ror, updated_gains
+
+
+def order_pivot_data(pivot_df, heat_map_ordering, years_list):
+    """
+    Purpose: Re-order the datafame so its columns are years desc and rows are investment based on those years \n
+    Created By: Robert Krall \n
+    Created On: 12/26/2024 \n
+    :param pivot_df:
+    :return:
+    """
+    # heat map columns
+    distinct_years = ['full_investment_name'] + sorted(years_list, reverse=True)
+    # Remove years from heat map df
+    # join the 2 dataframes to oder the set
+    pivot_df = pd.merge(pivot_df, heat_map_ordering, on=['full_investment_name'], how='left')
+    # Sort based on the created 'rank' column
+    pivot_df.sort_values(by='heat_map_order', ascending=True, inplace=True)
+    # re order columns
+    pivot_df = pivot_df[distinct_years]
+    pivot_df.set_index('full_investment_name', inplace=True)
+
+    return pivot_df
