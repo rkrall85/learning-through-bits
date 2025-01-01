@@ -16,6 +16,9 @@ def get_column_names():
         9: 'Balance', 10: 'Contributions - Employee', 11: 'Contributions - Employer', 12: 'Total Contributions',
         13: 'Roll Over', 14: '401k Flag', 15: 'Fire Flag', 16: 'HSA Flag', 17: 'End of Year Flag', 18: 'Total Retirement Flag'
     }
+    events_column_names = {
+        1: 'Event', 2: 'Date', 3: 'Year', 4: 'Summary', 5: 'Label', 6: 'Type', 7: 'Owner'
+    }
 
     pk = ['Company', 'Employer', 'Owner', 'Type']
 
@@ -24,6 +27,7 @@ def get_column_names():
 
     output_dict = {
         "balance_columns_names": balance_columns_names,
+        "events_column_names": events_column_names,
         "pk": pk,
         "balances": balances,
         "contributions": contributions
@@ -32,10 +36,7 @@ def get_column_names():
     return output_dict
 
 
-
-
-
-def get_pivoted_data(yearly_summary, heat_map_ordering):
+def get_pivoted_data(yearly_summary, heat_map_ordering, include_labels: bool = False):
     """
     Purpose: This will pivot the dataframe data to get data setup for heat map \n
     Created By: Robert Krall \n
@@ -44,14 +45,19 @@ def get_pivoted_data(yearly_summary, heat_map_ordering):
     :type yearly_summary: dataframe
     :return:
     """
-    pivot_ror = yearly_summary.pivot(index='full_investment_name', columns='Year', values='ROR')
-    pivot_gains = yearly_summary.pivot(index='full_investment_name', columns='Year', values='Gains')
+    pivot_ror = yearly_summary.pivot(index='full_investment_name', columns='Year', values='Rate of Return')
+    pivot_gains = yearly_summary.pivot(index='full_investment_name', columns='Year', values='Yearly Market Gains')
     years_list = sorted(yearly_summary['Year'].unique(), reverse=True)
 
     update_ror = order_pivot_data(pivot_ror, heat_map_ordering, years_list)
     updated_gains = order_pivot_data(pivot_gains, heat_map_ordering, years_list)
 
-    return update_ror, updated_gains
+    if include_labels:
+        pivot_labels = yearly_summary.pivot(index='full_investment_name', columns='Year', values='Label')
+        updated_labels = order_pivot_data(pivot_labels, heat_map_ordering, years_list)
+        return update_ror, updated_gains, updated_labels
+    else:
+        return update_ror, updated_gains
 
 
 def order_pivot_data(pivot_df, heat_map_ordering, years_list):

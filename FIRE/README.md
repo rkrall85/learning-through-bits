@@ -1,12 +1,40 @@
 
 
-### Fire Calculations 
+Table of Contents
 
-1. [Rate of Return](#rate-of-return-)
-2. [Compound Annual Growth Rate](#compound-annual-growth-rate)
-3. [IRR](#irr)
+<!-- TOC -->
+* [Fire Reports](#fire-reports)
+    * [HeatMaps](#heatmaps)
+* [Fire Calculations](#fire-calculations-)
+    * [Rate of Return](#rate-of-return-)
+    * [Compound Annual Growth Rate](#compound-annual-growth-rate)
+    * [IRR](#irr)
+<!-- TOC -->
 
----
+
+
+----
+**********************
+*********************
+*********************
+
+
+
+# Fire Reports
+
+
+### HeatMaps
+
+We have different types of HeatMaps.  The code is located [here](HeatMaps).
+
+
+----
+**********************
+*********************
+*********************
+
+
+# Fire Calculations 
 
 
 ### Rate of Return 
