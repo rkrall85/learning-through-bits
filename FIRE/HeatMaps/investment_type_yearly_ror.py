@@ -32,12 +32,10 @@ def get_env_vars(copy_file: bool = False):
 
 def calculate_yearly_mark_gains(row):
     # Function to calculate cash flow list for each row
-    return row['Ending Balance'] - row['Starting Balance'] - row['Total Contributions'] #- row['Roll Over']3
+   return row['Ending Balance'] - row['Total Contributions'] - row['Initial_Balance'] - row['Initial_Roll_Over'] - row['Starting Balance']
 
 def calculate_yearly_ror(row):
-    adjusted_starting_balance = row['Starting Balance'] + row['Initial_Roll_Over']
-    adjusted_ending_balance = row['Ending Balance'] - row['Total Contributions']
-    return (adjusted_ending_balance/adjusted_starting_balance)-1
+    return row['Yearly Market Gains'] / row['Ending Balance']
 
 
 copy_file = False
@@ -55,8 +53,8 @@ balances_columns = columns_names['balances']
 # Data Frames
 balances_df = balances_df.rename(columns=balance_columns_names)
 events_df = events_df.rename(columns=events_column_names)
-events_df = events_df[['Owner', 'Type', 'Year', 'Summary']]
-#balances_df = balances_df[(balances_df['Owner'] == 'Robert') & (balances_df['Type'] == '401k')] # Testing out a subset of data
+events_df = events_df[['Owner', 'Type', 'Year', 'HeatMapLabel']]
+#balances_df = balances_df[(balances_df['Owner'] == 'Robert') & (balances_df['Type'] == 'HSA')] # Testing out a subset of data
 balances_df = balances_df[(balances_df['Owner'] != 'Amanda')] # figure out how to fix Amandas ROR and tradtional IRA
 balances_df = balances_df[(balances_df['Type'] != 'Traditional IRA')] # figure out how to fix Amandas ROR and tradtional IRA
 balances = balances_df[balances_df['Total Retirement Flag'] == True]
@@ -70,7 +68,7 @@ balances_initial = balances.groupby(['Owner', 'Type']).agg(
 balances_initial = pd.merge(balances_initial, balances,
                                     on=['Owner', 'Type', 'Date'],
                                     how='inner').groupby(['Owner', 'Type']).agg(
-    Starting_Balance=('Balance', 'sum'),
+    Initial_Balance=('Balance', 'sum'),
     Year=('Year', 'min')
 ).reset_index()
 
@@ -111,23 +109,17 @@ balances_yearly_final_dataset.rename(columns={'Ending_Balance': 'Ending Balance'
 # re order columns
 balances_yearly_final_dataset = balances_yearly_final_dataset[['Owner', 'Type', 'Year', 'Starting Balance', 'Total Contributions', 'Roll Over', 'Ending Balance']]
 # Apply the function to each row and accumulate market gains and the ROR
-balances_yearly_final_dataset['Yearly Market Gains'] = balances_yearly_final_dataset.apply(calculate_yearly_mark_gains, axis=1)
+balances_yearly_final_dataset = pd.merge(balances_yearly_final_dataset, balances_initial, on=['Owner', 'Type', 'Year'],how='left')
+balances_yearly_final_dataset['Initial_Balance'].fillna(0, inplace=True)
+
 balances_yearly_final_dataset = pd.merge(balances_yearly_final_dataset, roll_over_initial, on=['Owner', 'Type', 'Year'],how='left')
 balances_yearly_final_dataset['Initial_Roll_Over'].fillna(0, inplace=True)
+
+balances_yearly_final_dataset['Yearly Market Gains'] = balances_yearly_final_dataset.apply(calculate_yearly_mark_gains, axis=1)
 balances_yearly_final_dataset['Rate of Return'] = balances_yearly_final_dataset.apply(calculate_yearly_ror, axis=1)
-# updating outliers until I find a better way to fix the calc
-balances_yearly_final_dataset.loc[
-    (balances_yearly_final_dataset['Owner'] == 'Robert') &
-    (balances_yearly_final_dataset['Type'] == 'HSA') &
-    (balances_yearly_final_dataset['Year'] == 2014)
-    , 'Rate of Return'] = 0
-balances_yearly_final_dataset.loc[
-    (balances_yearly_final_dataset['Owner'] == 'Robert') &
-    (balances_yearly_final_dataset['Type'] == 'Roth IRA') &
-    (balances_yearly_final_dataset['Year'] == 2010)
-    , 'Rate of Return'] = 0
+#print(balances_yearly_final_dataset.to_string())
 # grabbing label for investment
-events_df.rename(columns={'Summary':'Label'},inplace=True)
+events_df.rename(columns={'HeatMapLabel':'Label'},inplace=True)
 balances_yearly_final_dataset = pd.merge(balances_yearly_final_dataset, events_df, on=['Owner', 'Type', 'Year'], how='left')
 # Setting up the Heat Map
 yearly_summary = balances_yearly_final_dataset.copy()
@@ -163,7 +155,8 @@ for i in range(pivot_ror.shape[0]):
         annot_string = f'{ror:.2%}\n${gains:,.2f}'
         if pd.notna(labels):
             annot_string += f'\n\n{labels}'
-
+        else:
+            annot_string += f'\n\n'
         annot.iloc[i, j] = annot_string
 
 # Create the heatmap

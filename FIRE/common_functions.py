@@ -17,7 +17,7 @@ def get_column_names():
         13: 'Roll Over', 14: '401k Flag', 15: 'Fire Flag', 16: 'HSA Flag', 17: 'End of Year Flag', 18: 'Total Retirement Flag'
     }
     events_column_names = {
-        1: 'Event', 2: 'Date', 3: 'Year', 4: 'Summary', 5: 'Label', 6: 'Type', 7: 'Owner'
+        1: 'Event', 2: 'Date', 3: 'Year', 4: 'Summary', 5: 'Label', 6: 'Type', 7: 'Owner', 8: 'HeatMapLabel'
     }
 
     pk = ['Company', 'Employer', 'Owner', 'Type']
