@@ -39,7 +39,14 @@ We have different types of HeatMaps.  The code is located [here](HeatMaps).
 
 ### Rate of Return 
 
-<i>wip</i>
+This is the calc we use for Rate of Return.  This seems like the most accurate for the data being collected currently.
+
+```
+
+market_gains = ('Ending Balance' - 'Total Contributions' - 'Initial Balance' - 'Initial Roll Over' - 'Starting Balance')
+rate_of_return = market_gains / 'Ending Balance'
+
+```
 
 ----
 

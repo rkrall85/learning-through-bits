@@ -16,18 +16,20 @@ def get_column_names():
         13: 'Roll Over', 14: '401k Flag', 15: 'Fire Flag', 16: 'HSA Flag', 17: 'End of Year Flag', 18: 'Total Retirement Flag'
     }
     events_column_names = {
-        1: 'Event', 2: 'Date', 3: 'Year', 4: 'Summary', 5: 'Label', 6: 'Type', 7: 'Owner', 8: 'HeatMapLabel'
+        0: 'Event', 1: 'Date', 2: 'Year', 3: 'Summary', 4: 'Label', 5: 'Type', 6: 'Owner', 7: 'HeatMapLabel'
     }
 
-    pk = ['Company', 'Employer', 'Owner', 'Type']
+    pk_all_investment_types = ['Company', 'Employer', 'Owner', 'Type']
+    pk_investment_types = ['Owner', 'Type']
 
-    balances = pk + ['Year', 'Balance']
-    contributions = pk + ['Year', 'Total Contributions', 'Roll Over']
+    balances = pk_all_investment_types + ['Year', 'Balance']
+    contributions = pk_all_investment_types + ['Year', 'Total Contributions', 'Roll Over']
 
     output_dict = {
         "balance_columns_names": balance_columns_names,
         "events_column_names": events_column_names,
-        "pk": pk,
+        "pk_all_investment_types": pk_all_investment_types,
+        "pk_investment_types":pk_investment_types,
         "balances": balances,
         "contributions": contributions
     }
@@ -56,7 +58,7 @@ def get_pivoted_data(yearly_summary, heat_map_ordering, include_labels: bool = F
         updated_labels = order_pivot_data(pivot_labels, heat_map_ordering, years_list)
         return update_ror, updated_gains, updated_labels
     else:
-        return update_ror, updated_gains
+        return update_ror, updated_gains, None
 
 
 def order_pivot_data(pivot_df, heat_map_ordering, years_list):
