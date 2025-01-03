@@ -13,7 +13,7 @@ if os.name == "nt":
 
 def get_env_vars(copy_file: bool = False):
     if os.name == "nt":
-        file_name = "FIRE_tracker.xlsx"
+        file_name = "../FIRE_tracker.xlsx"
         cwd = os.getcwd()
         home_dir = os.path.expanduser('~')
         one_drive_relative_path = f'OneDrive\\Documents\\finance\\{file_name}'
@@ -79,7 +79,7 @@ def order_pivot_data(pivot_df, heat_map_ordering, years_list):
 
     return pivot_df
 
-copy_file = True
+copy_file = False
 current_date = datetime.now()
 tab_data = get_env_vars(copy_file)
 balances_df = tab_data['balances']
@@ -96,7 +96,7 @@ balances.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
 # Yearly balances
 yearly_balances = balances[balances['End of Year Flag'] == True][balances_columns]
 yearly_balances['Previous Balance'] = yearly_balances.groupby(pk)['Balance'].shift(1)
-#yearly_balances['Previous Balance'] = yearly_balances['Previous Balance'].fillna(1)
+#yearly_balances['Previous Balance'] = yearly_balances['Previous Balance'].fillna(1) # Need to figure out how to handle first year investments open.
 yearly_balances.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
 # yearly contributions
 group_by = pk + ['Year']
@@ -110,7 +110,7 @@ yearly_summary = pd.merge(yearly_balances, yearly_contributions, on=pk+['Year'],
 yearly_summary = yearly_summary[yearly_summary['Owner'] != 'Amanda'] # temp fix until I get the loan issue figured out
 
 yearly_summary['Gains'] = (yearly_summary['Balance'] - yearly_summary['Previous Balance']
-                           - yearly_summary['Total Contributions'] - yearly_summary['Roll Over'])
+                           - yearly_summary['Total Contributions'] )
 yearly_summary['ROR'] = yearly_summary.apply(calculate_ror, axis=1)
 # Getting unique IDs for investment names
 yearly_summary = yearly_summary.assign(
