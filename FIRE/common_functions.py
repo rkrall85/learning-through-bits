@@ -1,6 +1,5 @@
-
-
 import pandas as pd
+
 
 def get_column_names():
     """
@@ -80,3 +79,30 @@ def order_pivot_data(pivot_df, heat_map_ordering, years_list):
     pivot_df.set_index('full_investment_name', inplace=True)
 
     return pivot_df
+
+
+def calculate_yearly_market_gains(row):
+    """
+    Purpose: This function will calc the row(yearly) market gains \n
+    Created On: 01/01/2025 \n
+    Created By: Robert Krall \n
+    :param row: The row in the dataframe.
+    :return: market gains value
+    :rtype: float
+    """
+    return (
+        row['Ending Balance'] - row['Total Contributions'] - row['Initial_Balance']
+        - row['Initial_Roll_Over'] - row['Starting Balance']
+    )
+
+
+def calculate_yearly_ror(row):
+    """
+    Purpose: This function will calc the row(yearly) rate of return \n
+    Created By: Robert Krall \n
+    Created On: 01/01/2025 \n
+    :param row: the row for the dataframe
+    :return: the ror calc
+    :rtype float
+    """
+    return row['Yearly Market Gains'] / row['Ending Balance']

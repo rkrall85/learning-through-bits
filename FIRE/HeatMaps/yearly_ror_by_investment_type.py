@@ -30,13 +30,6 @@ def get_env_vars(copy_file: bool = False):
             "events": pd.DataFrame(xl("Events"))
         }
 
-def calculate_yearly_mark_gains(row):
-    # Function to calculate cash flow list for each row
-   return row['Ending Balance'] - row['Total Contributions'] - row['Initial_Balance'] - row['Initial_Roll_Over'] - row['Starting Balance']
-
-def calculate_yearly_ror(row):
-    return row['Yearly Market Gains'] / row['Ending Balance']
-
 
 copy_file = False
 current_date = datetime.now()
@@ -115,7 +108,7 @@ balances_yearly_final_dataset['Initial_Balance'].fillna(0, inplace=True)
 balances_yearly_final_dataset = pd.merge(balances_yearly_final_dataset, roll_over_initial, on=['Owner', 'Type', 'Year'],how='left')
 balances_yearly_final_dataset['Initial_Roll_Over'].fillna(0, inplace=True)
 
-balances_yearly_final_dataset['Yearly Market Gains'] = balances_yearly_final_dataset.apply(calculate_yearly_mark_gains, axis=1)
+balances_yearly_final_dataset['Yearly Market Gains'] = balances_yearly_final_dataset.apply(calculate_yearly_market_gains, axis=1)
 balances_yearly_final_dataset['Rate of Return'] = balances_yearly_final_dataset.apply(calculate_yearly_ror, axis=1)
 #print(balances_yearly_final_dataset.to_string())
 # grabbing label for investment
