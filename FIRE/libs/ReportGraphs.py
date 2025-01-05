@@ -64,3 +64,55 @@ def yearly_balance_bar_graph_with_predictions(df, selected_years, title, future_
     plt.show()
 
 
+def yearly_balance_stacked_bar_graph(df, selected_years, title='Company Balances Over Years', width=0.2):
+    """
+    Purpose: This function will stack the yearly retirement balance by category, employer, or type
+    :param df:
+    :param selected_years:
+    :param title:
+    :return:
+    """
+    # Filter the DataFrame based on selected years
+    selected_data = df[df['Year'].isin(selected_years)]
+    selected_years = sorted(selected_years)
+    indices = np.arange(len(selected_years))
+
+    # Plotting
+    plt.figure(figsize=(10, 6))
+
+    # want to move to the parent class
+    company_colors = {
+        'Associated Bank': 'green',
+        'Charles Schwab': 'orange',
+        'Fidelity': 'blue',
+        'John Hancock': 'purple',
+        'M1': 'brown',
+        'Vanguard': 'pink'
+    }
+
+    # Group data by Year and Company
+    grouped = selected_data.groupby(['Year', 'Company'])['Balance'].sum().unstack().fillna(0)
+
+    bottoms = np.zeros(len(selected_years))
+    colors = ['blue', 'orange', 'green', 'red', 'purple', 'brown']  # Add more colors if needed
+
+    for i, company in enumerate(grouped.columns):
+        balances = grouped[company].values
+        color = company_colors.get(company, 'gray') # colors[i % len(colors)]
+        plt.bar(indices, balances, width, bottom=bottoms, color=color, label=company)
+
+        # Add labels
+        for j, balance in enumerate(balances):
+            if balance != 0:
+                plt.text(indices[j], bottoms[j] + balance / 2, f'{locale.currency(balance, grouping=True)}', ha='center',va='center', color='white')
+
+        bottoms += balances
+
+    # Update x-ticks
+    plt.xticks(indices, selected_years)
+
+    plt.xlabel('Year')
+    plt.ylabel('Balance')
+    plt.title(title)
+    plt.legend()
+    plt.show()

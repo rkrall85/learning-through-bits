@@ -38,6 +38,7 @@ class ReportData:
         destination_path = os.path.join(cwd, f'{self.file_name}.xlsx');
         if self.copy_file: shutil.copy(source_path, destination_path);
 
+        # issue with copy; its not copying the values in the doc. (remove calcs in sheet and od it in python or find a better wya to copy)
         if self.use_copied_file:
             wb = load_workbook(filename=destination_path, read_only=True)  # load the workbook
             balances_sheet = wb['Balances']  # read the sheet from doc
@@ -60,12 +61,17 @@ class ReportData:
         filter_df = df[(df['End of Year Flag'] == True) & df['Total Retirement Flag'] == True]
         return filter_df
 
-    def get_yearly_retirement_balances(self):
+    def get_yearly_retirement_balances(self, group_by=None, return_hsa: bool = False, return_401k: bool = False):
         """
         Purpose: This function will create the bar graphs for all three retirement yearly balances reports (total retirement, 401k, HSA) \n
         Created By: Robert Krall \n
         Created Ono: 01/04/2025 \n
         """
+        if group_by is None:
+            group_by = ['Year']
+        if 'Year' not in group_by:
+            group_by.insert(0, 'Year')
+
         end_of_year_df = self.get_end_of_year_total_retirement_balance()
 
         # Filter Data
@@ -73,12 +79,18 @@ class ReportData:
         hsa_filter_df = end_of_year_df.loc[end_of_year_df['HSA Flag'] == True]
 
         # Balances
-        balances_tr = end_of_year_df.groupby(['Year']).agg(Balance=('Balance', 'sum')).reset_index()
-        balances_401k = retirement_filter_df.groupby(['Year']).agg(Balance=('Balance', 'sum')).reset_index()
-        balances_hsa = hsa_filter_df.groupby(['Year']).agg(Balance=('Balance', 'sum')).reset_index()
+        balances_tr = end_of_year_df.groupby(group_by).agg(Balance=('Balance', 'sum')).reset_index()
 
-        return balances_tr, balances_401k, balances_hsa
+        df_return = {'balances_tr': balances_tr}
 
+        if return_401k:
+            balances_401k = retirement_filter_df.groupby(group_by).agg(Balance=('Balance', 'sum')).reset_index()
+            df_return['balances_401k'] = balances_401k
+        if return_hsa:
+            balances_hsa = hsa_filter_df.groupby(group_by).agg(Balance=('Balance', 'sum')).reset_index()
+            df_return['balances_hsa'] = balances_hsa
+
+        return df_return
 
 
 '''
