@@ -5,6 +5,32 @@ import numpy as np
 import locale
 
 
+company_colors = {
+        'Associated Bank': 'green',
+        'Charles Schwab': 'orange',
+        'Fidelity': 'blue',
+        'John Hancock': 'purple',
+        'M1': 'brown',
+        'Vanguard': 'pink'
+}
+
+employer_colors = {
+        'Associated Bank': 'green',
+        'SwineTech': 'orange',
+        'Rocket Software': 'blue',
+        'Farm Credit': 'purple',
+        'Personal': 'brown',
+        'Vanguard': 'pink',
+        'UHS': 'red'
+}
+
+retirement_type_colors = {
+        '401k': 'green',
+        'HSA': 'blue',
+        'Roth IRA': 'brown'
+}
+
+
 def yearly_balance_bar_graph_with_predictions(df, selected_years, title, future_years_count):
     """
     Purpose: This Function will create a bar graph from the data frame of years and balances with future prediction \n
@@ -16,7 +42,7 @@ def yearly_balance_bar_graph_with_predictions(df, selected_years, title, future_
     :param future_years_count:
     :return:
     """
-    width = 0.2
+    width = 0.5
     selected_years = sorted(selected_years)  # Sort the selected years
     selected_data = df[df['Year'].isin(selected_years)]
     indices = np.arange(len(selected_years))
@@ -64,7 +90,7 @@ def yearly_balance_bar_graph_with_predictions(df, selected_years, title, future_
     plt.show()
 
 
-def yearly_balance_stacked_bar_graph(df, selected_years, title='Company Balances Over Years', width=0.2):
+def yearly_balance_stacked_bar_graph(df, selected_years, title='Company Balances Over Years', group_by=['Year', 'Company'], width=0.5 ):
     """
     Purpose: This function will stack the yearly retirement balance by category, employer, or type
     :param df:
@@ -80,26 +106,25 @@ def yearly_balance_stacked_bar_graph(df, selected_years, title='Company Balances
     # Plotting
     plt.figure(figsize=(10, 6))
 
-    # want to move to the parent class
-    company_colors = {
-        'Associated Bank': 'green',
-        'Charles Schwab': 'orange',
-        'Fidelity': 'blue',
-        'John Hancock': 'purple',
-        'M1': 'brown',
-        'Vanguard': 'pink'
-    }
-
     # Group data by Year and Company
-    grouped = selected_data.groupby(['Year', 'Company'])['Balance'].sum().unstack().fillna(0)
+    grouped = selected_data.groupby(group_by)['Balance'].sum().unstack().fillna(0)
 
     bottoms = np.zeros(len(selected_years))
     colors = ['blue', 'orange', 'green', 'red', 'purple', 'brown']  # Add more colors if needed
 
-    for i, company in enumerate(grouped.columns):
-        balances = grouped[company].values
-        color = company_colors.get(company, 'gray') # colors[i % len(colors)]
-        plt.bar(indices, balances, width, bottom=bottoms, color=color, label=company)
+    if 'Company' in group_by:
+        colors = company_colors
+    elif 'Employer' in group_by:
+        colors = employer_colors
+    elif 'Type' in group_by:
+        colors = retirement_type_colors
+    else:
+        colors = company_colors
+
+    for i, g in enumerate(grouped.columns):
+        balances = grouped[g].values
+        color = colors.get(g, 'gray') # colors[i % len(colors)]
+        plt.bar(indices, balances, width, bottom=bottoms, color=color, label=g)
 
         # Add labels
         for j, balance in enumerate(balances):
