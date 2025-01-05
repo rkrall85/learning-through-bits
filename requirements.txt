@@ -2,3 +2,7 @@ XlsxWriter
 pandas
 openpyxl
 jupyterlab
+seaborn
+plotly
+matplotlib
+numpy_financial
