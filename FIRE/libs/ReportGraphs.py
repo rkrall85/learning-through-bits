@@ -141,3 +141,75 @@ def yearly_balance_stacked_bar_graph(df, selected_years, title='Company Balances
     plt.title(title)
     plt.legend()
     plt.show()
+
+
+def yearly_contributions_stacked_bar_graph(df, selected_years, title, bar_width=0.5):
+    """
+
+    :param df:
+    :param selected_years:
+    :param title:
+    :param width:
+    :return:
+    """
+
+    # Filter the DataFrame based on selected years
+    filtered_df = df[df['Year'].isin(selected_years)]
+
+    # Unique years and owners
+    years = sorted(filtered_df['Year'].unique())
+    owners = filtered_df['Owner'].unique()
+
+    # Indices for bar positions
+    indices = np.arange(len(years))
+
+    # Set up the figure and axis
+    fig, ax1 = plt.subplots(figsize=(12, 8))
+
+    # Plotting colors for employee and employer contributions
+    colors = {'Employee': 'green', 'Employer': 'orange'}
+
+    # Plotting each year's contributions for each owner
+    for i, year in enumerate(years):
+        for j, owner in enumerate(owners):
+            owner_data = filtered_df[(filtered_df['Owner'] == owner) & (filtered_df['Year'] == year)]
+            if not owner_data.empty:
+                employee_contributions = owner_data['Employee'].values[0]
+                employer_contributions = owner_data['Employer'].values[0]
+
+                bar_position = i + (j - 0.5) * bar_width
+                ax1.bar(bar_position, employee_contributions, width=bar_width, color=colors['Employee'],label='Employee Contributions' if i == 0 and j == 0 else "")
+                ax1.bar(bar_position, employer_contributions, width=bar_width, bottom=employee_contributions,color=colors['Employer'], label='Employer Contributions' if i == 0 and j == 0 else "")
+
+                # Add labels for Employee contributions
+                ax1.text(bar_position, employee_contributions / 2, f'{locale.currency(employee_contributions, grouping=True)}', ha='center', color='white')
+                # Add labels for Employer contributions
+                ax1.text(bar_position, employee_contributions + employer_contributions / 2, f'{locale.currency(employer_contributions, grouping=True)}', ha='center', color='white')
+
+    # Plot the Employee Limit as a line on the same axis
+    df_grouped = filtered_df.groupby('Year')['Employee Limit'].max().reindex(years)
+    ax1.plot(indices, df_grouped.values, color='red', linestyle='--', marker='o', label='Employee Limit')
+
+    # Set labels
+    ax1.set_xlabel('Year')
+    ax1.set_ylabel('Contributions')
+    ax1.set_title(title)
+
+    # Update x-ticks to show all years with space for owner names
+    ax1.set_xticks(indices)
+    ax1.set_xticklabels([f'{year}' for year in years])
+
+    # Add owner labels below the x-ticks
+    for i, year in enumerate(years):
+        for j, owner in enumerate(owners):
+            bar_position = i + (j - 0.5) * bar_width
+            ax1.text(bar_position, -2000, f'{owner}', ha='center', va='top', rotation=45, fontsize=10, color='black')
+
+    # Add customized legend
+    handles, labels = ax1.get_legend_handles_labels()
+    unique_labels = dict(zip(labels, handles))
+    relevant_labels = {'Employee Contributions': 'green', 'Employer Contributions': 'orange', 'Employee Limit': 'red'}
+    relevant_handles = [unique_labels[key] for key in relevant_labels.keys()]
+    ax1.legend(relevant_handles, relevant_labels.keys(), loc='upper left', bbox_to_anchor=(1, 1))
+
+    plt.show()

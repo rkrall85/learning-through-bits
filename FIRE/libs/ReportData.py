@@ -20,12 +20,16 @@ class ReportData:
         self.file_name = file_name
         self.copy_file = copy_file
         self.use_copied_file = use_copied_file
-        self.balance_df = self.get_balance_data() # only grab the data once then re use the cache.
+
+        self.balances_df = None
+        self.contributions_df = None
+
+        self.get_excel_data()
         self.balance_core_fields = ['Company', 'Employer', 'Owner', 'Year', 'Balance']
 
-    def get_balance_data(self):
+    def get_excel_data(self):
         """
-        Purpose: This function will grab all the balance data \n
+        Purpose: This function will grab all the sheets of data we need \n
         Created By: Robert Krall \n
         Created On: 01/04/2025 \n
         :return: dataframe of data
@@ -44,11 +48,12 @@ class ReportData:
             balances_sheet = wb['Balances']  # read the sheet from doc
             balance_data = balances_sheet.values  # create dataframe from sheets
             headers = next(balance_data)
-            balances_df = pd.DataFrame(balance_data, columns=headers)
-        else:
-            balances_df = pd.read_excel(source_path, sheet_name="Balances")
+            self.balances_df = pd.DataFrame(balance_data, columns=headers)
 
-        return balances_df
+        else:
+            self.balances_df = pd.read_excel(source_path, sheet_name="Balances")
+            self.contributions_df = pd.read_excel(source_path, sheet_name="Contributions Limits")
+            # evnets? goals?
 
     def get_end_of_year_total_retirement_balance(self):
         """
@@ -57,7 +62,7 @@ class ReportData:
         Created On: 01/04/2025
         :return:
         """
-        df = self.balance_df
+        df = self.balances_df
         filter_df = df[(df['End of Year Flag'] == True) & df['Total Retirement Flag'] == True]
         return filter_df
 
@@ -91,6 +96,32 @@ class ReportData:
             df_return['balances_hsa'] = balances_hsa
 
         return df_return
+
+    def get_yearly_contributions(self, account_type: str = '401k'):
+        """
+        Purpose: This function will return the yearly contributions broken down by employee, and employer with yearly employee limit. \n
+        Created By: Robert Krall \n
+        Created On: 01/05/2025 \n
+        :param account_type: 401k HSA, Roth IRA, etc
+        :type account_type: str
+        :return: dataframe of values
+        """
+        bal_df = self.balances_df[self.balances_df['Type'] == account_type]
+        con_df = self.contributions_df[self.contributions_df['Type'] == account_type][['Year','Employee Limit']]
+
+        yearly_contributions = bal_df.groupby(['Year', 'Owner']).agg(
+            Employee=('Contributions - Employee', 'sum'),
+            Employer=('Contributions - Employer', 'sum')
+        ).reset_index()
+
+        yearly_contributions = pd.merge(yearly_contributions, con_df, on='Year', how='left')
+
+        return yearly_contributions
+
+
+
+
+
 
 
 '''
