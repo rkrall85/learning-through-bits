@@ -22,7 +22,7 @@ class ReportData:
         self.use_copied_file = use_copied_file
 
         self.balances_df = None
-        self.contributions_df = None
+        self.contributions_limits_df = None
 
         self.get_excel_data()
         self.balance_core_fields = ['Company', 'Employer', 'Owner', 'Year', 'Balance']
@@ -52,7 +52,7 @@ class ReportData:
 
         else:
             self.balances_df = pd.read_excel(source_path, sheet_name="Balances")
-            self.contributions_df = pd.read_excel(source_path, sheet_name="Contributions Limits")
+            self.contributions_limits_df = pd.read_excel(source_path, sheet_name="Contributions Limits")
             # evnets? goals?
 
     def get_end_of_year_total_retirement_balance(self):
@@ -97,7 +97,7 @@ class ReportData:
 
         return df_return
 
-    def get_yearly_contributions(self, account_type: str = '401k'):
+    def get_yearly_contributions_per_person(self, account_type: str = '401k'):
         """
         Purpose: This function will return the yearly contributions broken down by employee, and employer with yearly employee limit. \n
         Created By: Robert Krall \n
@@ -106,8 +106,9 @@ class ReportData:
         :type account_type: str
         :return: dataframe of values
         """
+
         bal_df = self.balances_df[self.balances_df['Type'] == account_type]
-        con_df = self.contributions_df[self.contributions_df['Type'] == account_type][['Year','Employee Limit']]
+        con_df = self.contributions_limits_df[self.contributions_limits_df['Type'] == account_type][['Year','Employee Limit']]
 
         yearly_contributions = bal_df.groupby(['Year', 'Owner']).agg(
             Employee=('Contributions - Employee', 'sum'),
@@ -118,6 +119,22 @@ class ReportData:
 
         return yearly_contributions
 
+    def get_yearly_retirement_contributions(self, agg_by=None):
+        """
+        Purpose: This function will return the yearly contributions broken down by employee, and employer with yearly employee limit. \n
+        Created By: Robert Krall \n
+        Created On: 01/08/2025 \n
+        :return: dataframe of values
+        """
+        group_by = ['Year']
+        group_by.insert(1, agg_by)
+        bal_df = self.balances_df[(self.balances_df['Total Retirement Flag'] == True) & (self.balances_df['Total Contributions'] != 0)]
+
+        yearly_contributions = bal_df.groupby(group_by).agg(
+            Contributions=('Total Contributions', 'sum')
+        ).reset_index()
+
+        return yearly_contributions
 
 
 

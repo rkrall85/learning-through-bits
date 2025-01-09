@@ -16,12 +16,12 @@ company_colors = {
 
 employer_colors = {
         'Associated Bank': 'green',
-        'SwineTech': 'orange',
+        'SwineTech': 'pink',
         'Rocket Software': 'blue',
         'Farm Credit': 'purple',
         'Personal': 'brown',
-        'Vanguard': 'pink',
-        'UHS': 'red'
+        'Vanguard': 'orange',
+        'UHS': '#016667'
 }
 
 retirement_type_colors = {
@@ -90,7 +90,10 @@ def yearly_balance_bar_graph_with_predictions(df, selected_years, title, future_
     plt.show()
 
 
-def yearly_balance_stacked_bar_graph(df, selected_years, title='Company Balances Over Years', group_by=['Year', 'Company'], width=0.5 ):
+def yearly_balance_stacked_bar_graph(
+        df, selected_years, title='Company Balances Over Years',
+        group_by=['Year', 'Company'], width=0.5, money_type:str="Balance"
+):
     """
     Purpose: This function will stack the yearly retirement balance by category, employer, or type
     :param df:
@@ -107,7 +110,7 @@ def yearly_balance_stacked_bar_graph(df, selected_years, title='Company Balances
     plt.figure(figsize=(10, 6))
 
     # Group data by Year and Company
-    grouped = selected_data.groupby(group_by)['Balance'].sum().unstack().fillna(0)
+    grouped = selected_data.groupby(group_by)[money_type].sum().unstack().fillna(0)
 
     bottoms = np.zeros(len(selected_years))
     colors = ['blue', 'orange', 'green', 'red', 'purple', 'brown']  # Add more colors if needed
@@ -167,7 +170,7 @@ def yearly_contributions_stacked_bar_graph(df, selected_years, title, bar_width=
     fig, ax1 = plt.subplots(figsize=(12, 8))
 
     # Plotting colors for employee and employer contributions
-    colors = {'Employee': 'green', 'Employer': 'orange'}
+    colors = {'Employee': '#016667', 'Employer': '#670201'}
 
     # Plotting each year's contributions for each owner
     for i, year in enumerate(years):
@@ -208,7 +211,7 @@ def yearly_contributions_stacked_bar_graph(df, selected_years, title, bar_width=
     # Add customized legend
     handles, labels = ax1.get_legend_handles_labels()
     unique_labels = dict(zip(labels, handles))
-    relevant_labels = {'Employee Contributions': 'green', 'Employer Contributions': 'orange', 'Employee Limit': 'red'}
+    relevant_labels = {'Employee Contributions': '#016667', 'Employer Contributions': '#670201', 'Employee Limit': 'red'}
     relevant_handles = [unique_labels[key] for key in relevant_labels.keys()]
     ax1.legend(relevant_handles, relevant_labels.keys(), loc='upper left', bbox_to_anchor=(1, 1))
 
