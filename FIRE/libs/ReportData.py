@@ -8,7 +8,7 @@ import os
 import pandas as pd
 from openpyxl import load_workbook
 import shutil
-
+from datetime import datetime
 
 class ReportData:
     def __init__(
@@ -164,7 +164,7 @@ class ReportData:
         previous_balance = previous_balance_df['Balance'].sum()
 
         # goal s
-        goal_balances = [1000000, 2000000, 3000000, 4000000, 5000000]
+        goal_balances = [1000000, 2000000, 3000000]
         # goal dates
         balances_df = self.get_yearly_retirement_balances()['balances_tr']
         crossed_years = []
@@ -172,6 +172,7 @@ class ReportData:
         # Initialize a set to keep track of crossed goals
         crossed_goals = set()
         goal_years = set()
+        goal_ages = set()
 
         # Iterate through each row in the dataframe
         for index, row in balances_df.iterrows():
@@ -181,9 +182,11 @@ class ReportData:
                 if goal not in crossed_goals and balance >= goal:
                     crossed_years.append((year, goal))
                     crossed_goals.add(goal)
-                    goal_years.add(year)
+                    birth_date = datetime(1990, 4, 25)
+                    age = year - birth_date.year
+                    goal_ages.add(age)
 
-        return current_balance, previous_balance, goal_balances, goal_years
+        return current_balance, previous_balance, goal_balances, goal_years, goal_ages
 
 
 
