@@ -55,15 +55,23 @@ class ReportData:
             self.contributions_limits_df = pd.read_excel(source_path, sheet_name="Contributions Limits")
             # evnets? goals?
 
-    def get_end_of_year_total_retirement_balance(self):
+    def get_end_of_year_total_retirement_balance(self, year: int= None):
         """
         Purpose: Get the 401k, HSA, end of year balances\n
         Created By: Robert Krall \n
         Created On: 01/04/2025
+        Updated On  | Purpose \n
+        01/10/2025 | Added Year Parm
+
+        :param year: The year you want to filter on
+        :type year: int
         :return:
         """
         df = self.balances_df
-        filter_df = df[(df['End of Year Flag'] == True) & df['Total Retirement Flag'] == True]
+        if year is None:
+            filter_df = df[(df['End of Year Flag'] == True) & (df['Total Retirement Flag'] == True)]
+        else:
+            filter_df = df[(df['End of Year Flag'] == True) & (df['Total Retirement Flag'] == True) & (df['Year'] == year)]
         return filter_df
 
     def get_yearly_retirement_balances(self, group_by=None, return_hsa: bool = False, return_401k: bool = False):
@@ -135,6 +143,56 @@ class ReportData:
         ).reset_index()
 
         return yearly_contributions
+
+    def get_fire_balances(self):
+        """
+        Purpose: This function will return the fire balances and goal dates \n
+        Created By: Robert Krall \n
+        Created On: 01/10/2025 \n
+        :return:
+        """
+
+        # current year
+        year = self.balances_df['Year'].max()
+
+        # current balance
+        current_balance_df = self.get_end_of_year_total_retirement_balance(year=year)
+        current_balance = current_balance_df['Balance'].sum()
+
+        # previous balance
+        previous_balance_df = self.get_end_of_year_total_retirement_balance(year=year-1)
+        previous_balance = previous_balance_df['Balance'].sum()
+
+        # goal s
+        goal_balances = [1000000, 2000000, 3000000, 4000000, 5000000]
+        # goal dates
+        balances_df = self.get_yearly_retirement_balances()['balances_tr']
+        crossed_years = []
+
+        # Initialize a set to keep track of crossed goals
+        crossed_goals = set()
+        goal_years = set()
+
+        # Iterate through each row in the dataframe
+        for index, row in balances_df.iterrows():
+            balance = row['Balance']
+            year = row['Year']
+            for goal in goal_balances:
+                if goal not in crossed_goals and balance >= goal:
+                    crossed_years.append((year, goal))
+                    crossed_goals.add(goal)
+                    goal_years.add(year)
+
+        return current_balance, previous_balance, goal_balances, goal_years
+
+
+
+
+
+
+
+
+
 
 
 
