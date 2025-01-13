@@ -1,5 +1,4 @@
 
-
 import matplotlib.pyplot as plt
 import numpy as np
 import locale
@@ -92,10 +91,12 @@ def yearly_balance_bar_graph_with_predictions(df, selected_years, title, future_
 
 def yearly_balance_stacked_bar_graph(
         df, selected_years, title='Company Balances Over Years',
-        group_by=['Year', 'Company'], width=0.5, money_type:str="Balance"
+        group_by=['Year', 'Company'], width=0.5, money_type: str = 'Balance'
 ):
     """
     Purpose: This function will stack the yearly retirement balance by category, employer, or type
+    :param money_type:
+    :param width:
     :param df:
     :param selected_years:
     :param title:
@@ -132,7 +133,7 @@ def yearly_balance_stacked_bar_graph(
         # Add labels
         for j, balance in enumerate(balances):
             if balance != 0:
-                plt.text(indices[j], bottoms[j] + balance / 2, f'{locale.currency(balance, grouping=True)}', ha='center',va='center', color='white')
+                plt.text(indices[j], bottoms[j] + balance / 2, f'{locale.currency(balance, grouping=True)}', ha='center' ,va='center', color='white')
 
         bottoms += balances
 
@@ -181,8 +182,10 @@ def yearly_contributions_stacked_bar_graph(df, selected_years, title, bar_width=
                 employer_contributions = owner_data['Employer'].values[0]
 
                 bar_position = i + (j - 0.5) * bar_width
-                ax1.bar(bar_position, employee_contributions, width=bar_width, color=colors['Employee'],label='Employee Contributions' if i == 0 and j == 0 else "")
-                ax1.bar(bar_position, employer_contributions, width=bar_width, bottom=employee_contributions,color=colors['Employer'], label='Employer Contributions' if i == 0 and j == 0 else "")
+                ax1.bar(bar_position, employee_contributions, width=bar_width, color=colors['Employee']
+                        ,label='Employee Contributions' if i == 0 and j == 0 else "")
+                ax1.bar(bar_position, employer_contributions, width=bar_width, bottom=employee_contributions
+                        ,color=colors['Employer'], label='Employer Contributions' if i == 0 and j == 0 else "")
 
                 # Add labels for Employee contributions
                 ax1.text(bar_position, employee_contributions / 2, f'{locale.currency(employee_contributions, grouping=True)}', ha='center', color='white')
@@ -215,4 +218,187 @@ def yearly_contributions_stacked_bar_graph(df, selected_years, title, bar_width=
     relevant_handles = [unique_labels[key] for key in relevant_labels.keys()]
     ax1.legend(relevant_handles, relevant_labels.keys(), loc='upper left', bbox_to_anchor=(1, 1))
 
+    plt.show()
+
+
+def get_current_goal(current_balance, goal_balances):
+    for goal in goal_balances:
+        if current_balance < goal:
+            return goal
+    return goal_balances[-1]
+
+
+def fire_progress_bar(current_balance, previous_balance, goal_balances, goal_dates, goal_ages):
+    """
+    Purpose: This function will create the FIRE progresses bar \n
+    Created On: 01/11/2025 \n
+    Created By: Robert Krall \n
+    :param current_balance:
+    :param previous_balance:
+    :param goal_balances:
+    :param goal_dates:
+    :param goal_ages:
+    :return:
+    """
+
+    # Determine the current target goal
+    current_target_goal = get_current_goal(current_balance, goal_balances)
+    current_target_index = goal_balances.index(current_target_goal)
+
+    # Calculate progress towards the current target goal
+    previous_goal = previous_balance if current_target_index == 0 else goal_balances[current_target_index - 1]
+    progress = current_balance / current_target_goal * 100 if current_target_index == 0 else (current_balance - previous_goal) / (current_target_goal - previous_goal) * 100
+
+    # Ensure the progress line does not go beyond the current target goal
+    if progress > 100:
+        progress = 100
+
+    # Normalize goal positions to prevent overlap
+    goal_positions = [(goal - previous_balance) / (goal_balances[-1] - previous_balance) * 100 for goal in goal_balances]
+
+    # Create gradient for the progress bar
+    fig, ax = plt.subplots(figsize=(8, 3))
+    gradient = np.linspace(1, 0, 256)
+    gradient = np.vstack((gradient, gradient))
+
+    # Calculate the actual position of the progress bar within the goal range
+    if current_target_index == 0:
+        progress_position = (progress / 100) * goal_positions[current_target_index]
+    else:
+        progress_position = (current_balance - previous_goal) / (goal_balances[current_target_index] - previous_goal) * \
+                            (goal_positions[current_target_index] - goal_positions[current_target_index - 1]) + \
+                            goal_positions[current_target_index - 1]
+
+    # Plot gradient only up to the progress percentage
+    ax.imshow(gradient, aspect='auto', cmap=plt.get_cmap('Greens'), extent=[0, progress_position, 0, 1])
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 1)
+
+    # Change the progress line color to blue
+    ax.axvline(progress_position, color='blue', linestyle='-', linewidth=2, alpha=0.7)
+    ax.text(progress_position, -0.1, f'{progress:.2f}%', horizontalalignment='center', fontsize=12, color='blue')
+
+    # Add vertical lines for each goal balance with dates
+    for i, (goal_balance, goal_position) in enumerate(zip(goal_balances, goal_positions)):
+
+        # Determine color based on whether the goal has a date (met) or not (unmet)
+        if current_balance >= goal_balance:
+            goal_color = 'green'
+            goal_text = f'Goal: {goal_balance // 1000000}M'
+            if i < len(goal_dates): goal_text += f'\nMet: {goal_dates[i].strftime("%Y")}'
+            if i < len(goal_ages): goal_text += f'\nAge: {goal_ages[i]}'
+        else:
+            goal_color = 'red'
+            goal_text = f'Goal: {goal_balance // 1000000}M'
+
+        ax.axvline(goal_position, color=goal_color, linestyle='--', linewidth=2)
+        ax.text(goal_position, 1.1, goal_text, horizontalalignment='center', fontsize=12, fontweight='bold', color=goal_color)
+
+    # Add text for current balance and change to the right of the progress bar
+    ax.text(105, 0.75, f'Current Balance: ${current_balance:,.2f}', horizontalalignment='left', fontsize=14, fontweight='bold')
+    change = current_balance - previous_balance
+    change_percentage = (change / previous_balance) * 100
+    if change >= 0:
+        change_text = f'YoY Increase: ${change:,.2f} ({change_percentage:.2f}%)'
+    else:
+        change_text = f'YoY Decrease: ${change:,.2f} ({change_percentage:.2f}%)'
+    ax.text(105, 0.4, change_text, horizontalalignment='left', fontsize=12, color='black')
+
+    # Hide axes
+    ax.axis('off')
+
+    # Display the plot
+    plt.show()
+
+
+def pie_chart_balance_breakdown(df):
+    """
+    Purpose: This function will output a pie chart of the current breakdown of balances
+    :param df:
+    :return:
+    """
+
+    # Data for the pie chart
+    labels = df['Type']
+    sizes = df['Balances']
+    colors = [retirement_type_colors[t] for t in df['Type']]
+    explode = [0.1] + [0] * (len(df) - 1)  # Dynamic explode list
+
+    # Create the pie chart with custom percentage text color
+    wedges, texts, autotexts = plt.pie(sizes, explode=explode, labels=labels, colors=colors,
+                                       autopct='%1.1f%%', shadow=True, startangle=140)
+
+    # Set percentage text color to white
+    for autotext in autotexts:
+        autotext.set_color('white')
+
+    # Equal aspect ratio ensures that pie is drawn as a circle
+    plt.axis('equal')
+
+    # Add a title
+    plt.title('Current Retirement Balance Breakdown')
+
+    # Display the pie chart
+    plt.show()
+
+
+def bar_chart_contributions_left(
+        df,
+        current_year: str,
+        previous_year: str,
+        contribution_type: str = 'HSA',
+        owner: str = None
+):
+
+    current_year = float(current_year)
+    previous_year = float(previous_year)
+
+    # Convert 'Year' and 'year_sort' to strings to handle fractional years
+    df['Year'] = df['Year'].astype(str)
+    df['year_sort'] = df['year_sort'].astype(str)
+
+    # Get xticks and xticklabels from the dataframe
+    xticklabels = df['year_label'].to_list()
+    xticks = df['year_sort'].to_list()
+
+    # Plot the contributions comparison using a stacked bar graph
+    fig, ax = plt.subplots()
+
+    # Bar graph for each year
+    for i, row in df.iterrows():
+        bar = ax.bar(row['year_sort'], row['Contributions'], label=f'{row["Year"]} Contributed So Far',
+                     color='blue' if row['year_sort'] == f"{current_year}" else (
+                         'green' if row['year_sort'] == f"{previous_year}" else 'orange'))
+        ax.bar(row['year_sort'], row['Remaining Contribution'], bottom=row['Contributions'], label='_nolegend_',
+               color='lightgray')  # Use '_nolegend_' for no label
+
+        # Calculate the percentage of contributions
+        percentage = (row['Contributions'] / row['yearly_contributions']) * 100
+
+        # Add white labels for contributions formatted as currency with two decimal places and percentage
+        ax.text(row['year_sort'], row['Contributions'] / 2, f'${row["Contributions"]:.2f}\n({percentage:.2f}%)',
+                color='white', ha='center', va='center')
+
+    # Add labels and title
+    ax.set_ylabel('Amount ($)')
+    if owner is not None:
+        ax.set_title(f'{owner} - {contribution_type} Contributions Comparison: Various Years')
+    else:
+        ax.set_title(f'{contribution_type} Contributions Comparison: Various Years')
+
+    # Set x-ticks to the sorted years
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
+
+    # Only add legend once to avoid duplicates
+    handles, labels = ax.get_legend_handles_labels()
+    unique_labels = []
+    unique_handles = []
+    for handle, label in zip(handles, labels):
+        if label not in unique_labels:
+            unique_labels.append(label)
+            unique_handles.append(handle)
+    ax.legend(unique_handles, unique_labels)
+
+    # Display the graph
     plt.show()

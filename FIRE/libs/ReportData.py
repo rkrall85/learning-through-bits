@@ -8,7 +8,8 @@ import os
 import pandas as pd
 from openpyxl import load_workbook
 import shutil
-from datetime import datetime
+import datetime
+
 
 class ReportData:
     def __init__(
@@ -23,6 +24,11 @@ class ReportData:
 
         self.balances_df = None
         self.contributions_limits_df = None
+
+        # used for filtering data
+        self.current_year = None
+        self.previous_year = None
+        self.current_quarter = None
 
         self.get_excel_data()
         self.balance_core_fields = ['Company', 'Employer', 'Owner', 'Year', 'Balance']
@@ -53,9 +59,14 @@ class ReportData:
         else:
             self.balances_df = pd.read_excel(source_path, sheet_name="Balances")
             self.contributions_limits_df = pd.read_excel(source_path, sheet_name="Contributions Limits")
-            # evnets? goals?
 
-    def get_end_of_year_total_retirement_balance(self, year: int= None):
+            self.current_year = self.balances_df['Year'].max()
+            self.previous_year = self.current_year - 1
+
+            current_date = datetime.datetime.now()
+            self.current_quarter = (current_date.month - 1) // 3 + 1
+
+    def get_end_of_year_total_retirement_balance(self, year: int = None):
         """
         Purpose: Get the 401k, HSA, end of year balances\n
         Created By: Robert Krall \n
@@ -144,6 +155,75 @@ class ReportData:
 
         return yearly_contributions
 
+    def get_yearly_contributions_left(self, type: str = 'HSA', owner: str = None):
+
+        # special logic for if we are looking at person contributions
+        if owner is not None:
+            contribution_field = 'Contributions - Employee'
+        else:
+            contribution_field = 'Total Contributions'
+
+        # getting contributions
+        yearly_bal_df = self.balances_df[
+            (self.balances_df['Type'] == type) &
+            ((self.balances_df['Year'] == self.current_year) |
+             (self.balances_df['Year'] == self.previous_year))
+            ]
+
+        # Apply the dynamic filter for person_Var if it's not None
+        if owner is not None:
+            yearly_bal_df = yearly_bal_df[yearly_bal_df['Owner'] == owner]
+
+        # Select the required columns
+        yearly_bal_df = yearly_bal_df[['Year', contribution_field]]
+
+        previous_ytq_df = self.balances_df[
+            (self.balances_df['Type'] == type) &
+            (self.balances_df['Year'] == self.previous_year) &
+            (self.balances_df['Quarter'] <= self.current_quarter)
+        ]
+        # Apply the dynamic filter for person_Var if it's not None
+        if owner is not None:
+            previous_ytq_df = previous_ytq_df[previous_ytq_df['Owner'] == owner]
+
+        # Select the required columns
+        previous_ytq_df = previous_ytq_df[['Year', contribution_field]]
+
+        current_year_contributions = yearly_bal_df[yearly_bal_df['Year'] == self.current_year][contribution_field].sum()
+        previous_year_contributions = yearly_bal_df[yearly_bal_df['Year'] == self.previous_year][contribution_field].sum()
+        previous_ytq_contributions = previous_ytq_df[previous_ytq_df['Year'] == self.previous_year][contribution_field].sum()
+
+        # Getting Limits
+        limits_df = self.contributions_limits_df[
+            (self.contributions_limits_df['Type'] == type) &
+            ((self.contributions_limits_df['Year'] == self.current_year) |
+             (self.contributions_limits_df['Year'] == self.previous_year))
+            ][['Year', 'Employee Limit']]
+
+        current_limit = limits_df[limits_df['Year'] == self.current_year]['Employee Limit'].iloc[0]
+        previous_limit = limits_df[limits_df['Year'] == self.previous_year]['Employee Limit'].iloc[0]
+
+        data = {
+            'Year': [self.current_year, self.previous_year, self.previous_year],
+            'year_sort': [self.current_year, self.previous_year, self.previous_year + .1],
+            'year_label': [f"{self.current_year}", f"{self.previous_year}", f"{self.previous_year} (Q{self.current_quarter})"],
+            'Contributions': [current_year_contributions, previous_year_contributions, previous_ytq_contributions],
+            'Contribution Limit': [current_limit, previous_limit, previous_limit],
+            'yearly_contributions': [current_limit, previous_limit, previous_limit]
+        }
+        df = pd.DataFrame(data)
+
+        df['Remaining Contribution'] = df['Contribution Limit'] - df['Contributions']
+
+        # Convert 'Year' and 'year_sort' to strings to handle fractional years
+        df['Year'] = df['Year'].astype(str)
+        df['year_sort'] = df['year_sort'].astype(str)
+
+        # Sort the dataframe by the 'Year' column to change the order
+        df = df.sort_values(by='year_sort')
+
+        return df
+
     def get_fire_balances(self):
         """
         Purpose: This function will return the fire balances and goal dates \n
@@ -152,15 +232,12 @@ class ReportData:
         :return:
         """
 
-        # current year
-        year = self.balances_df['Year'].max()
-
         # current balance
-        current_balance_df = self.get_end_of_year_total_retirement_balance(year=year)
+        current_balance_df = self.get_end_of_year_total_retirement_balance(year=self.current_year)
         current_balance = current_balance_df['Balance'].sum()
 
         # previous balance
-        previous_balance_df = self.get_end_of_year_total_retirement_balance(year=year-1)
+        previous_balance_df = self.get_end_of_year_total_retirement_balance(year=self.current_year - 1)
         previous_balance = previous_balance_df['Balance'].sum()
 
         # goal s
