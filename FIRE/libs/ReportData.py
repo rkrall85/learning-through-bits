@@ -169,27 +169,30 @@ class ReportData:
             ((self.balances_df['Year'] == self.current_year) |
              (self.balances_df['Year'] == self.previous_year))
             ]
-
-        # Apply the dynamic filter for person_Var if it's not None
-        if owner is not None:
-            yearly_bal_df = yearly_bal_df[yearly_bal_df['Owner'] == owner]
-
-        # Select the required columns
-        yearly_bal_df = yearly_bal_df[['Year', contribution_field]]
-
+        current_ytq_df = self.balances_df[
+            (self.balances_df['Type'] == type) &
+            (self.balances_df['Year'] == self.current_year) &
+            (self.balances_df['Quarter'] <= self.current_quarter)
+        ]
         previous_ytq_df = self.balances_df[
             (self.balances_df['Type'] == type) &
             (self.balances_df['Year'] == self.previous_year) &
             (self.balances_df['Quarter'] <= self.current_quarter)
         ]
+
         # Apply the dynamic filter for person_Var if it's not None
         if owner is not None:
+            yearly_bal_df = yearly_bal_df[yearly_bal_df['Owner'] == owner]
+            current_ytq_df = current_ytq_df[current_ytq_df['Owner'] == owner]
             previous_ytq_df = previous_ytq_df[previous_ytq_df['Owner'] == owner]
 
         # Select the required columns
+        yearly_bal_df = yearly_bal_df[['Year', contribution_field]]
+        current_ytq_df = current_ytq_df[['Year', contribution_field]]
         previous_ytq_df = previous_ytq_df[['Year', contribution_field]]
 
         current_year_contributions = yearly_bal_df[yearly_bal_df['Year'] == self.current_year][contribution_field].sum()
+        current_ytd_contributions = current_ytq_df[current_ytq_df['Year'] == self.current_year][contribution_field].sum()
         previous_year_contributions = yearly_bal_df[yearly_bal_df['Year'] == self.previous_year][contribution_field].sum()
         previous_ytq_contributions = previous_ytq_df[previous_ytq_df['Year'] == self.previous_year][contribution_field].sum()
 
@@ -204,12 +207,13 @@ class ReportData:
         previous_limit = limits_df[limits_df['Year'] == self.previous_year]['Employee Limit'].iloc[0]
 
         data = {
-            'Year': [self.current_year, self.previous_year, self.previous_year],
-            'year_sort': [self.current_year, self.previous_year, self.previous_year + .1],
-            'year_label': [f"{self.current_year}", f"{self.previous_year}", f"{self.previous_year} (Q{self.current_quarter})"],
-            'Contributions': [current_year_contributions, previous_year_contributions, previous_ytq_contributions],
-            'Contribution Limit': [current_limit, previous_limit, previous_limit],
-            'yearly_contributions': [current_limit, previous_limit, previous_limit]
+            'Year': [self.current_year, self.previous_year, self.previous_year, self.current_year],
+            #'year_sort': [self.current_year, self.previous_year, self.previous_year + .1, self.current_year +.1],
+            'year_sort': [2, 1, 3, 4],
+            'year_label': [f"{self.current_year}", f"{self.previous_year}", f"{self.previous_year} (Q{self.current_quarter})", f"{self.current_year} (Q{self.current_quarter})"],
+            'Contributions': [current_year_contributions, previous_year_contributions, previous_ytq_contributions, current_ytd_contributions],
+            'Contribution Limit': [current_limit, previous_limit, previous_limit, current_limit],
+            'yearly_contributions': [current_limit, previous_limit, previous_limit, current_limit]
         }
         df = pd.DataFrame(data)
 

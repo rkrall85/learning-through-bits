@@ -26,7 +26,9 @@ employer_colors = {
 retirement_type_colors = {
         '401k': 'green',
         'HSA': 'blue',
-        'Roth IRA': 'brown'
+        'Roth IRA': 'brown',
+        'Post': 'blue',
+        'Pre': 'green'
 }
 
 
@@ -311,7 +313,7 @@ def fire_progress_bar(current_balance, previous_balance, goal_balances, goal_dat
     plt.show()
 
 
-def pie_chart_balance_breakdown(df):
+def pie_chart_balance_breakdown(df, by_column: str = 'Type'):
     """
     Purpose: This function will output a pie chart of the current breakdown of balances
     :param df:
@@ -319,14 +321,16 @@ def pie_chart_balance_breakdown(df):
     """
 
     # Data for the pie chart
-    labels = df['Type']
+    labels = df[by_column]
     sizes = df['Balances']
-    colors = [retirement_type_colors[t] for t in df['Type']]
+    colors = [retirement_type_colors[t] for t in df[by_column]]
     explode = [0.1] + [0] * (len(df) - 1)  # Dynamic explode list
 
     # Create the pie chart with custom percentage text color
-    wedges, texts, autotexts = plt.pie(sizes, explode=explode, labels=labels, colors=colors,
-                                       autopct='%1.1f%%', shadow=True, startangle=140)
+    wedges, texts, autotexts = plt.pie(
+        sizes, explode=explode, labels=labels, colors=colors,
+        autopct='%1.1f%%', shadow=True, startangle=140
+    )
 
     # Set percentage text color to white
     for autotext in autotexts:
@@ -336,7 +340,7 @@ def pie_chart_balance_breakdown(df):
     plt.axis('equal')
 
     # Add a title
-    plt.title('Current Retirement Balance Breakdown')
+    plt.title(f'Current Retirement Balance Breakdown by {by_column}')
 
     # Display the pie chart
     plt.show()
@@ -367,8 +371,8 @@ def bar_chart_contributions_left(
     # Bar graph for each year
     for i, row in df.iterrows():
         bar = ax.bar(row['year_sort'], row['Contributions'], label=f'{row["Year"]} Contributed So Far',
-                     color='blue' if row['year_sort'] == f"{current_year}" else (
-                         'green' if row['year_sort'] == f"{previous_year}" else 'orange'))
+                     color='blue' if row['year_sort'] in ('2', '4') else (
+                         'green' if row['year_sort'] in ('1', '3') else 'orange'))
         ax.bar(row['year_sort'], row['Remaining Contribution'], bottom=row['Contributions'], label='_nolegend_',
                color='lightgray')  # Use '_nolegend_' for no label
 
