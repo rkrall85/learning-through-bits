@@ -357,20 +357,20 @@ def retirement_progress_bar(current_contributions, contributions_goal, yearly_co
     ax.set_ylim(0, 1)
 
     # Add a blue line indicating the yearly progress
-    ax.axvline(yearly_progress, color='blue', linestyle='-', linewidth=2, alpha=0.7)
-    ax.text(yearly_progress, -0.1, f'{yearly_progress:.2f}% ({year}) \n', horizontalalignment='center', fontsize=12, color='blue')
+    ax.axvline(yearly_progress, color='green', linestyle='-', linewidth=2, alpha=0.7)
+    ax.text(yearly_progress, -0.1, f'{yearly_progress:.2f}% ({year}) \n', horizontalalignment='center', fontsize=12, color='green')
 
     # Add a green line indicating the previous progress
-    ax.axvline(previous_progress, color='green', linestyle='-', linewidth=2, alpha=0.7)
-    ax.text(previous_progress, -0.15, f'{previous_progress:.2f}% ({year-1}) \n', horizontalalignment='center', fontsize=12, color='green')
+    ax.axvline(previous_progress, color='blue', linestyle='-', linewidth=2, alpha=0.7)
+    ax.text(previous_progress, -0.15, f'{previous_progress:.2f}% ({year-1}) \n', horizontalalignment='center', fontsize=12, color='blue')
     #ax.axvline((current_quarter - 1) * 25 + quarterly_progress / 4, color='green', linestyle='-', linewidth=2, alpha=0.7)
     #ax.text((current_quarter - 1) * 25 + quarterly_progress / 4, -0.1, f'{quarterly_progress:.2f}% ({year-1})', horizontalalignment='center', fontsize=12, color='green')
 
     # Add text for current contributions and goal
     ax.text(105, 0.75, f'Current Contributions: ${current_contributions:,.2f}', horizontalalignment='left', fontsize=14,
-            fontweight='bold')
+            fontweight='bold', color='green')
     ax.text(105, 0.60, f'Previous Contributions: ${previous_contributions:,.2f}', horizontalalignment='left', fontsize=12,
-            fontweight='bold')
+            fontweight='bold', color='blue')
     ax.text(105, 0.4, f'Quarter Goal: ${contributions_goal:,.2f}', horizontalalignment='left', fontsize=12,
             color='black')
     ax.text(105, 0.3, f'Yearly Goal: ${yearly_contributions:,.2f}', horizontalalignment='left', fontsize=12,
@@ -378,10 +378,20 @@ def retirement_progress_bar(current_contributions, contributions_goal, yearly_co
 
     # Plot quarterly benchmarks as orange lines
     for i, benchmark in enumerate(quarterly_benchmarks):
+        if current_quarter == i+1:
+            quarter_color = 'purple'
+            quarter_line_stype = "-."
+        elif current_contributions >= benchmark:
+            quarter_color = 'green'
+            quarter_line_stype = ":"
+        else:
+            quarter_color = 'orange'
+            quarter_line_stype = "--"
+
         benchmark_position = (benchmark / yearly_contributions) * 100
-        ax.axvline(benchmark_position, color='orange', linestyle='--', linewidth=2)
+        ax.axvline(benchmark_position, color=quarter_color, linestyle=quarter_line_stype, linewidth=2)
         ax.text(benchmark_position, 1.1, f'Q{i + 1} Benchmark: \n ${benchmark:,.2f}', horizontalalignment='center',
-                fontsize=12, color='orange')
+                fontsize=12, color=quarter_color)
 
     # Chart Title
     plt.title(f'{owner} 401k Contribution Tracker')
