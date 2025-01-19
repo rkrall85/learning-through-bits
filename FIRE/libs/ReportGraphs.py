@@ -313,6 +313,86 @@ def fire_progress_bar(current_balance, previous_balance, goal_balances, goal_dat
     plt.show()
 
 
+def retirement_progress_bar(current_contributions, contributions_goal, yearly_contributions, owner, year, quarter, previous_contributions):
+    # Calculate quarterly benchmarks
+    quarterly_contributions = yearly_contributions / 4
+    quarterly_benchmarks = [quarterly_contributions * (i + 1) for i in range(4)]
+
+    # Calculate progress for yearly goal
+    yearly_progress = (current_contributions / yearly_contributions) * 100
+    previous_progress = (previous_contributions / yearly_contributions) * 100
+
+    # Ensure the progress line does not go beyond 100%
+    if yearly_progress > 100:
+        yearly_progress = 100
+
+    # Determine the current quarter based on current contributions
+    if quarter is None:
+        current_quarter = 0
+        for i, benchmark in enumerate(quarterly_benchmarks):
+            if current_contributions <= benchmark:
+                current_quarter = i + 1
+                break
+    else:
+        current_quarter = quarter
+
+    # Calculate progress for the current quarter goal
+    current_quarter_goal = quarterly_benchmarks[current_quarter - 1]
+
+
+    #(current_contributions / current_quarter_goal) * 100
+
+    # Ensure the progress line does not go beyond 100%
+    if previous_progress > 100:
+        previous_progress = 100
+
+    # Create a progress bar
+    fig, ax = plt.subplots(figsize=(10, 6))
+    gradient = np.linspace(1, 0, 256)
+    gradient = np.vstack((gradient, gradient))
+
+    # Plot gradient up to the yearly progress percentage
+    ax.imshow(gradient, aspect='auto', cmap=plt.get_cmap('Greens'), extent=[0, yearly_progress, 0, 1])
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 1)
+
+    # Add a blue line indicating the yearly progress
+    ax.axvline(yearly_progress, color='blue', linestyle='-', linewidth=2, alpha=0.7)
+    ax.text(yearly_progress, -0.1, f'{yearly_progress:.2f}% ({year}) \n', horizontalalignment='center', fontsize=12, color='blue')
+
+    # Add a green line indicating the previous progress
+    ax.axvline(previous_progress, color='green', linestyle='-', linewidth=2, alpha=0.7)
+    ax.text(previous_progress, -0.15, f'{previous_progress:.2f}% ({year-1}) \n', horizontalalignment='center', fontsize=12, color='green')
+    #ax.axvline((current_quarter - 1) * 25 + quarterly_progress / 4, color='green', linestyle='-', linewidth=2, alpha=0.7)
+    #ax.text((current_quarter - 1) * 25 + quarterly_progress / 4, -0.1, f'{quarterly_progress:.2f}% ({year-1})', horizontalalignment='center', fontsize=12, color='green')
+
+    # Add text for current contributions and goal
+    ax.text(105, 0.75, f'Current Contributions: ${current_contributions:,.2f}', horizontalalignment='left', fontsize=14,
+            fontweight='bold')
+    ax.text(105, 0.60, f'Previous Contributions: ${previous_contributions:,.2f}', horizontalalignment='left', fontsize=12,
+            fontweight='bold')
+    ax.text(105, 0.4, f'Quarter Goal: ${contributions_goal:,.2f}', horizontalalignment='left', fontsize=12,
+            color='black')
+    ax.text(105, 0.3, f'Yearly Goal: ${yearly_contributions:,.2f}', horizontalalignment='left', fontsize=12,
+            color='black')
+
+    # Plot quarterly benchmarks as orange lines
+    for i, benchmark in enumerate(quarterly_benchmarks):
+        benchmark_position = (benchmark / yearly_contributions) * 100
+        ax.axvline(benchmark_position, color='orange', linestyle='--', linewidth=2)
+        ax.text(benchmark_position, 1.1, f'Q{i + 1} Benchmark: \n ${benchmark:,.2f}', horizontalalignment='center',
+                fontsize=12, color='orange')
+
+    # Chart Title
+    plt.title(f'{owner} 401k Contribution Tracker')
+
+    # Hide axes
+    ax.axis('off')
+
+    # Display the plot
+    plt.show()
+
+
 def pie_chart_balance_breakdown(df, by_column: str = 'Type'):
     """
     Purpose: This function will output a pie chart of the current breakdown of balances
