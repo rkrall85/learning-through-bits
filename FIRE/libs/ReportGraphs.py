@@ -313,14 +313,14 @@ def fire_progress_bar(current_balance, previous_balance, goal_balances, goal_dat
     plt.show()
 
 
-def retirement_progress_bar(current_contributions, contributions_goal, yearly_contributions, owner, year, quarter, previous_contributions):
+def retirement_progress_bar(current_contributions, contributions_goal, yearly_contributions, owner, year, quarter, previous_contributions, previous_yearly_contributions):
     # Calculate quarterly benchmarks
     quarterly_contributions = yearly_contributions / 4
     quarterly_benchmarks = [quarterly_contributions * (i + 1) for i in range(4)]
 
     # Calculate progress for yearly goal
     yearly_progress = (current_contributions / yearly_contributions) * 100
-    previous_progress = (previous_contributions / yearly_contributions) * 100
+    previous_progress = (previous_contributions / previous_yearly_contributions) * 100
 
     # Ensure the progress line does not go beyond 100%
     if yearly_progress > 100:
@@ -352,9 +352,9 @@ def retirement_progress_bar(current_contributions, contributions_goal, yearly_co
     gradient = np.vstack((gradient, gradient))
 
     # Plot gradient up to the yearly progress percentage
-    ax.imshow(gradient, aspect='auto', cmap=plt.get_cmap('Greens'), extent=[0, yearly_progress, 0, 1])
-    ax.set_xlim(0, 100)
-    ax.set_ylim(0, 1)
+    #ax.imshow(gradient, aspect='auto', cmap=plt.get_cmap('Greens'), extent=[0, yearly_progress, 0, 1])
+    #ax.set_xlim(0, 100)
+    #ax.set_ylim(0, 1)
 
     # Add a blue line indicating the yearly progress
     ax.axvline(yearly_progress, color='green', linestyle='-', linewidth=2, alpha=0.7)
@@ -377,10 +377,16 @@ def retirement_progress_bar(current_contributions, contributions_goal, yearly_co
             color='black')
 
     # Plot quarterly benchmarks as orange lines
+    progress_color = 'Reds'
     for i, benchmark in enumerate(quarterly_benchmarks):
         if current_quarter == i+1:
             quarter_color = 'purple'
             quarter_line_stype = "-."
+            # figuring out the color of pregress bar
+            percentage_to_benchmark = current_contributions / benchmark
+            if percentage_to_benchmark >= .90: progress_color = 'Greens'
+            if .70 <= percentage_to_benchmark < .90: progress_color = 'autumn_r'
+
         elif current_contributions >= benchmark:
             quarter_color = 'green'
             quarter_line_stype = ":"
@@ -392,6 +398,11 @@ def retirement_progress_bar(current_contributions, contributions_goal, yearly_co
         ax.axvline(benchmark_position, color=quarter_color, linestyle=quarter_line_stype, linewidth=2)
         ax.text(benchmark_position, 1.1, f'Q{i + 1} Benchmark: \n ${benchmark:,.2f}', horizontalalignment='center',
                 fontsize=12, color=quarter_color)
+
+    # Plot gradient up to the yearly progress percentage
+    ax.imshow(gradient, aspect='auto', cmap=plt.get_cmap(progress_color), extent=[0, yearly_progress, 0, 1])
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 1)
 
     # Chart Title
     plt.title(f'{owner} 401k Contribution Tracker')
@@ -470,7 +481,7 @@ def bar_chart_contributions_left(
         percentage = (row['Contributions'] / row['yearly_contributions']) * 100
 
         # Add white labels for contributions formatted as currency with two decimal places and percentage
-        ax.text(row['year_sort'], row['Contributions'] / 2, f'${row["Contributions"]:.2f}\n({percentage:.2f}%)',
+        ax.text(row['year_sort'], row['Contributions'] / 2, f'${row["Contributions"]:,.2f}\n({percentage:.2f}%)',
                 color='white', ha='center', va='center')
 
     # Add labels and title

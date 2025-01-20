@@ -324,7 +324,10 @@ class ReportData:
         # Grabbing Previous Year progress
         df_p = self.get_yearly_contributions_left(type='401k', owner=owner, year=year-1, quarter=quarter)
         df_p = df_p[(df_p['current_year_flag'] == True) & (df_p['year_quarter'].notnull())]
+        df_p = df_p.rename(columns={"yearly_contributions": "Yearly Contributions"})
+
         previous_contributions = df_p['Contributions'].iloc[0]
+        previous_yearly_contributions = df_p['Yearly Contributions'].iloc[0]
 
         '''
         # Sample values
@@ -349,7 +352,7 @@ class ReportData:
         '''
 
 
-        return current_contributions, contributions_goal, yearly_contributions, previous_contributions
+        return current_contributions, contributions_goal, yearly_contributions, previous_contributions, previous_yearly_contributions
 
 
 
