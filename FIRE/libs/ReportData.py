@@ -77,8 +77,6 @@ class ReportData:
 
             self.year_list = self.balances_df['Year'].drop_duplicates().sort_values(ascending=False).to_list()
 
-
-
     def get_end_of_year_total_retirement_balance(self, year: int = None):
         """
         Purpose: Get the 401k, HSA, end of year balances\n
@@ -350,8 +348,6 @@ class ReportData:
 
         
         '''
-
-
         return current_contributions, contributions_goal, yearly_contributions, previous_contributions, previous_yearly_contributions
 
 
