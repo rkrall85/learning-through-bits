@@ -8,8 +8,10 @@ import os
 import pandas as pd
 from openpyxl import load_workbook
 import shutil
+import yfinance as yf
 import datetime
-
+import numpy as np
+from datetime import datetime
 
 class ReportData:
     def __init__(
@@ -24,6 +26,7 @@ class ReportData:
 
         self.balances_df = None
         self.contributions_limits_df = None
+        self.stock_prices_df = None
 
         # used for filtering data
         self.current_year = None
@@ -68,11 +71,12 @@ class ReportData:
         else:
             self.balances_df = pd.read_excel(source_path, sheet_name="Balances")
             self.contributions_limits_df = pd.read_excel(source_path, sheet_name="Contributions Limits")
+            self.stock_prices_df = pd.read_excel(source_path, sheet_name="Stocks")
 
             self.current_year = self.balances_df['Year'].max()
             self.previous_year = self.current_year - 1
 
-            current_date = datetime.datetime.now()
+            current_date = datetime.today()
             self.current_quarter = (current_date.month - 1) // 3 + 1
 
             self.year_list = self.balances_df['Year'].drop_duplicates().sort_values(ascending=False).to_list()
@@ -351,22 +355,7 @@ class ReportData:
         return current_contributions, contributions_goal, yearly_contributions, previous_contributions, previous_yearly_contributions
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-'''
-class Reports(ReportData):
+class StockData(ReportData):
     def __init__(
             self,
             file_name: str = "FIRE_tracker",
@@ -378,4 +367,284 @@ class Reports(ReportData):
              copy_file,
              use_copied_file
          )
-'''
+
+    def get_current_stock_price(self, stock_ticker):
+        """
+        Purpose: Returns the current stock price at close \n
+        Created By: Robert Krall \n
+        Created On: 02/06/2025 \n
+        :param stock_ticker:
+        :return:
+        """
+        today = datetime.today()
+        yesterday = today - datetime.timedelta(days=2) # cant be on weekends
+        stock_data = yf.download(stock_ticker, start=yesterday, end=today, multi_level_index=False, actions=True)
+        close_price = stock_data.loc[yesterday.strftime('%Y-%m-%d'),'Close']
+
+        return close_price
+
+    def get_stock_ticker_info(self, stock_ticker: str):
+        """
+        Purpose: This function will return various info about the stock. \n
+        Created On: 02/09/2025 \n
+        Created By: Robert Krall
+        :param stock_ticker: a Stock Ticker such as MMM
+        :type stock_ticker: str
+        :return: a dictionary of values
+        :rtype dict
+        """
+
+        ticker = yf.Ticker(stock_ticker)
+
+        long_name = None
+        inception_date = None
+        category = None
+        fund_family = None
+
+        if 'longName' in ticker.info: long_name = ticker.info['longName']
+        if 'fundInceptionDate' in ticker.info:
+            inception_date = ticker.info['fundInceptionDate']
+            inception_date = datetime.utcfromtimestamp(inception_date)
+            inception_date = inception_date.date()
+            inception_date = inception_date.strftime('%Y-%m-%d')
+        if 'category' in ticker.info: category = ticker.info['category']
+        if 'fundFamily' in ticker.info: fund_family = ticker.info['fundFamily']
+
+        # updating category / fund family if its missing
+        if fund_family is None:
+            if 'Fidelity' in long_name: fund_family = 'Fidelity'
+            if 'Vanguard' in long_name: fund_family = 'Vanguard'
+        if category is None:
+            if 'Mid Cap' in long_name: category = 'Mid-Cap Blend'
+            if 'Small Cap' in long_name: category = 'Small Blend'
+            if 'Small Cap' in long_name: category = 'Small Blend'
+            if 'International' in long_name: category = 'Foreign Large Blend'
+            if '500' in long_name: category = 'Large Blend'
+            if stock_ticker == 'FSMAX': category = 'Mid-Cap Blend'
+            if stock_ticker == 'VIIIX': category = 'Large Blend'
+            if stock_ticker == 'VINIX': category = 'Large Blend'
+            if stock_ticker == 'FFOLX': category = 'Target Date Blend'
+
+        # calc the expense ration
+        total_assets = None
+        total_costs = None
+        expense_ratio = None
+        if 'totalAssets' in ticker.info: total_assets = ticker.info['totalAssets']
+        if 'totalCosts' in ticker.info: total_costs = ticker.info['totalCosts']
+        if total_assets is not None and total_costs is not None:
+            expense_ratio = total_costs / total_assets
+
+        stats = {
+            'Stock': [stock_ticker],
+            'Long Name': [long_name],
+            'Inception Date': [inception_date],
+            'Category': [category],
+            'Fund Family': [fund_family],
+            'Total Assets': [total_assets],
+            'Total Costs': [total_costs],
+            'Expense Ratio': [expense_ratio],
+        }
+        stats_df = pd.DataFrame(stats)
+        return stats_df
+
+
+    def get_future_retirement_balance(self, contributions_df, future_years: int = 20):
+        """
+        Purpose: This function will predict future value of retirement balance using various methods. \n
+        Created By: Robert Krall \n
+        Created On: 02/08/2025 \n
+
+        :param future_years: Number of years in the future
+        :type future_years: int
+
+        :return:
+        """
+
+        current_year = datetime.today().year
+        years = list(range(current_year, current_year + (future_years+1)))
+        years_df = pd.DataFrame({'Year': years})
+
+        # Getting Rate of Return per stock ticker
+        current_stocks_df = self.stock_prices_df[
+            ['Company', 'Employer', 'Owner', 'Type', 'Sub Type', 'Stock Ticker', 'Shares', 'Weighted Average']]
+        stocks = sorted(set(current_stocks_df['Stock Ticker'].to_list()))
+
+        ror_df = self.get_historic_ror(stocks)
+        ror_df['ROR (8%)'] = .08
+        ror_df['Current Stock Price'] = ror_df.apply(
+            lambda row: self.get_current_stock_price(stock_ticker=row['Stock Ticker']), axis=1)
+
+        ror_df['key'] = 1
+        years_df['key'] = 1
+        # Calc the future pricing
+        # Using weighted averages and what tickers are currently being purchased.
+        future_pricing = pd.merge(years_df, ror_df, on='key').drop('key', axis=1)
+        # default future stock price
+        future_pricing['Future Stock Price (30 yr ROR)'] = 0.0
+        future_pricing['Future Stock Price (8% ROR)'] = 0.0
+        temp_pricing = future_pricing.copy()
+        future_pricing.set_index(['Year', 'Stock Ticker'], inplace=True)
+
+        # Iterate over each stock ticker ( I think we can write this better in the future)
+        for stock in temp_pricing['Stock Ticker'].unique():
+            # Get the rows for the specific stock
+            stock_rows = temp_pricing[temp_pricing['Stock Ticker'] == stock]
+
+            # Iterate over each year for the specific stock
+            for i in range(len(stock_rows)):
+                thirty_year_ror = stock_rows.loc[stock_rows.index[i], 'ROR (30 Years)']
+                baseline_ror = stock_rows.loc[stock_rows.index[i], 'ROR (8%)']
+
+                if i == 0:
+                    # For the current year, calculate Future Stock Price using Current Stock Price
+                    stock_rows.loc[stock_rows.index[i], 'Future Stock Price (30 yr ROR)'] = stock_rows.loc[
+                                                                                                stock_rows.index[
+                                                                                                    i], 'Current Stock Price'] * (
+                                                                                                        1 + thirty_year_ror)
+
+                    stock_rows.loc[stock_rows.index[i], 'Future Stock Price (8% ROR)'] = stock_rows.loc[stock_rows.index[
+                        i], 'Current Stock Price'] * (1 + baseline_ror)
+
+                else:
+                    # For future years, calculate Future Stock Price using previous Future Stock Price
+                    stock_rows.loc[stock_rows.index[i], 'Future Stock Price (30 yr ROR)'] = stock_rows.loc[
+                                                                                                stock_rows.index[
+                                                                                                    i - 1], 'Future Stock Price (30 yr ROR)'] * (
+                                                                                                        1 + thirty_year_ror)
+
+                    stock_rows.loc[stock_rows.index[i], 'Future Stock Price (8% ROR)'] = stock_rows.loc[stock_rows.index[
+                        i - 1], 'Future Stock Price (8% ROR)'] * (1 + baseline_ror)
+            # update dataframe
+            stock_rows.set_index(['Year', 'Stock Ticker'], inplace=True)
+            future_pricing.update(stock_rows)
+
+        # remove index
+        future_pricing.reset_index(inplace=True)
+        future_pricing = pd.merge(future_pricing, current_stocks_df, on=['Stock Ticker'], how="left")
+
+        future_pricing = pd.merge(future_pricing, contributions_df,
+                                  on=['Company', 'Employer', 'Owner', 'Type', 'Sub Type'], how="left")
+        future_pricing['Yearly Contributions'] = future_pricing['Weighted Average'] * future_pricing['Contributions']
+
+        # Trimming columns I want
+        future_pricing = future_pricing[[
+            'Year', 'Company', 'Employer', 'Owner', 'Type', 'Sub Type', 'Stock Ticker', 'Yearly Contributions',
+            'Shares', 'Future Stock Price (30 yr ROR)', 'Future Stock Price (8% ROR)'
+        ]]
+
+        # calc the 10 yr, 20 yr, 8% shares that will be bought each year
+        future_pricing['30 yr shares'] = future_pricing['Yearly Contributions'] / future_pricing[
+            'Future Stock Price (30 yr ROR)']
+        future_pricing['8% shares'] = future_pricing['Yearly Contributions'] / future_pricing[
+            'Future Stock Price (8% ROR)']
+
+        future_pricing['30 yr shares over time'] = 0
+        future_pricing['8% shares over time'] = 0
+
+        future_pricing.fillna(0, inplace=True)
+
+        # getting the shares over time.
+        for index, row in future_pricing.iterrows():
+            # PK
+            company = row['Company']
+            employer = row['Employer']
+            owner = row['Owner']
+            type = row['Type']
+            sub_type = row['Sub Type']
+            stock_ticker = row['Stock Ticker']
+
+            # New Shares
+            thirty_yr_shares = row['30 yr shares']
+            eight_percentage_shares = row['8% shares']
+
+            base_stock_filter = (
+                    (future_pricing['Company'] == company) &
+                    (future_pricing['Employer'] == employer) &
+                    (future_pricing['Owner'] == owner) &
+                    (future_pricing['Type'] == type) &
+                    (future_pricing['Sub Type'] == sub_type) &
+                    (future_pricing['Stock Ticker'] == stock_ticker)
+            )
+
+            if row['Year'] == current_year:
+                stock_filter = base_stock_filter & (future_pricing['Year'] == row['Year'])
+
+                thirty_yr_shares += future_pricing.loc[stock_filter, 'Shares'].iloc[0]
+                eight_percentage_shares += future_pricing.loc[stock_filter, 'Shares'].iloc[0]
+            else:
+                stock_filter = base_stock_filter & (
+                            future_pricing['Year'] == row['Year'] - 1)  # Grab Last year data to populate
+                thirty_yr_shares += future_pricing.loc[stock_filter, '30 yr shares over time'].iloc[0]
+                eight_percentage_shares += future_pricing.loc[stock_filter, '8% shares over time'].iloc[0]
+                stock_filter = base_stock_filter & (future_pricing['Year'] == row['Year'])  # populate current year data
+
+            # update rows in DF
+            future_pricing.loc[stock_filter, '30 yr shares over time'] = thirty_yr_shares
+            future_pricing.loc[stock_filter, '8% shares over time'] = eight_percentage_shares
+
+        # Calcing future Value
+        future_pricing['30 avg ror balance'] = future_pricing['Future Stock Price (30 yr ROR)'] * future_pricing[
+            '30 yr shares over time']
+        future_pricing['8% ror balance'] = future_pricing['Future Stock Price (8% ROR)'] * future_pricing[
+            '8% shares over time']
+
+        retirement_balances = future_pricing.groupby('Year').agg(
+            Thirty_Year_Average_RoR_Balance=('30 avg ror balance', sum),
+            Eight_Percentage_RoR_Balance=('8% ror balance', sum)
+        ).reset_index()
+
+        return retirement_balances
+
+    def get_historic_ror(self, stocks: list):
+        """
+        Purpose: This function will pass the average 10, 20, 30 year ROR per stock in a list \n
+        Created By: Robert Krall \n
+        Created On: 02/06/2025 \n
+
+        :param stocks: List of stock tickers
+        :return:  dataframe of stocks and historic Rate of Returns (30 year time frame)
+        """
+
+        stock_ror_df = pd.DataFrame(columns=['Stock Ticker', 'ROR (30 Years)'])
+
+        for s in stocks:
+            ror_30_years = self.get_average_annual_return(s, 30)
+
+            data = [{
+                'Stock Ticker': s,
+                'ROR (30 Years)': ror_30_years
+            }]
+            stock_ror_df = stock_ror_df._append(data, ignore_index=True)
+
+        return stock_ror_df
+
+    def get_average_annual_return(self,portfolio_tickers, years: int = 10):
+        """
+        Purpose: Calculates the average annual rate of return for a portfolio of index funds using the yfinance API.
+        Created BY: Robert Krall \n
+        Created On: 02/09/2025
+
+        Args:
+          portfolio_tickers: A list of tickers for the index funds in the portfolio.
+          years: how many years you want the average rate of return to be calculated for.
+
+        Returns:
+          The real average rate of return per ticker.  The real average takes in account inflation per the time range you are looking up
+        """
+
+        # Get historical prices for each index fund.
+        ticker = yf.Ticker(portfolio_tickers)
+        hist_data = ticker.history(period=f'{years}y')
+
+        # calc hte average yearly rate of return
+        returns = hist_data['Close'].pct_change().dropna()
+        average_yearly_return = returns.mean() * 252  # Adjusting for 252 trading days in a year
+
+        # want to get the real inflation number instead of using 3% in the future. Well use the CPI Index calc
+        inflation = 0.03
+        real_rate = ((1 + average_yearly_return) / (1 + inflation)) - 1
+
+        stats = self.get_stock_ticker_info(portfolio_tickers)
+        print(stats)
+
+        return real_rate
