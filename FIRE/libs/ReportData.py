@@ -11,7 +11,9 @@ import shutil
 import yfinance as yf
 import datetime
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timedelta
+from utility_methods import *
+
 
 class ReportData:
     def __init__(
@@ -27,6 +29,7 @@ class ReportData:
         self.balances_df = None
         self.contributions_limits_df = None
         self.stock_prices_df = None
+        self.stock_info_df = None
 
         # used for filtering data
         self.current_year = None
@@ -72,6 +75,7 @@ class ReportData:
             self.balances_df = pd.read_excel(source_path, sheet_name="Balances")
             self.contributions_limits_df = pd.read_excel(source_path, sheet_name="Contributions Limits")
             self.stock_prices_df = pd.read_excel(source_path, sheet_name="Stocks")
+            self.cpi_df = pd.read_excel(source_path, sheet_name="CPI")
 
             self.current_year = self.balances_df['Year'].max()
             self.previous_year = self.current_year - 1
@@ -141,7 +145,12 @@ class ReportData:
         :return: dataframe of values
         """
 
-        bal_df = self.balances_df[self.balances_df['Type'] == account_type]
+        if account_type == '401k': sub_type = 'Traditional - 401k'
+        elif account_type == 'HSA': sub_type = 'HSA'
+        elif account_type == 'Roth IRA': sub_type = 'Roth - IRA'
+        else: sub_type = 'Traditional - 401k'
+
+        bal_df = self.balances_df[self.balances_df['Sub Type'] == sub_type]
         con_df = self.contributions_limits_df[self.contributions_limits_df['Type'] == account_type][['Year','Employee Limit']]
 
         yearly_contributions = bal_df.groupby(['Year', 'Owner']).agg(
@@ -187,23 +196,21 @@ class ReportData:
         if quarter is None:
             quarter = self.current_quarter
 
+        if type =='401k':
+            flag_filter = (self.balances_df['401k Flag'] == True)
+        elif type =='HSA':
+            flag_filter = (self.balances_df['HSA Flag'] == True)
+        else:
+            flag_filter = (self.balances_df['401k Flag'] == True) # default to 401k
 
         # getting contributions
-        yearly_bal_df = self.balances_df[
-            (self.balances_df['Type'] == type) &
-            ((self.balances_df['Year'] == year) |
-             (self.balances_df['Year'] == previous_year))
-            ]
-        current_ytq_df = self.balances_df[
-            (self.balances_df['Type'] == type) &
-            (self.balances_df['Year'] == year) &
-            (self.balances_df['Quarter'] <= quarter)
-        ]
-        previous_ytq_df = self.balances_df[
-            (self.balances_df['Type'] == type) &
-            (self.balances_df['Year'] == previous_year) &
-            (self.balances_df['Quarter'] <= quarter)
-        ]
+        yearly_bal_filter = flag_filter & ((self.balances_df['Year'] == year) | (self.balances_df['Year'] == previous_year))
+        current_ytq_filter = flag_filter & (self.balances_df['Year'] == year) & (self.balances_df['Quarter'] <= quarter)
+        previous_ytq_filter = flag_filter & (self.balances_df['Year'] == previous_year) & (self.balances_df['Quarter'] <= quarter)
+
+        yearly_bal_df = self.balances_df[yearly_bal_filter]
+        current_ytq_df = self.balances_df[current_ytq_filter]
+        previous_ytq_df = self.balances_df[previous_ytq_filter]
 
         # Apply the dynamic filter for person_Var if it's not None
         if owner is not None:
@@ -360,28 +367,33 @@ class StockData(ReportData):
             self,
             file_name: str = "FIRE_tracker",
             copy_file: bool = False,
-            use_copied_file: bool = False
+            use_copied_file: bool = False,
+            get_stock_info: bool = True
     ):
-         super().__init__(
-             file_name,
-             copy_file,
-             use_copied_file
-         )
+        super().__init__(
+            file_name,
+            copy_file,
+            use_copied_file
+        )
+        if get_stock_info:
+            self.stock_info_df = self._get_investment_stock_info()
+        else:
+            self.stock_info_df = None
 
-    def get_current_stock_price(self, stock_ticker):
+    def _get_investment_stock_info(self):
         """
-        Purpose: Returns the current stock price at close \n
+        Purpose: This function will grab al the current investment info we need  \n
+        Created On: 02/10/2025 \n
         Created By: Robert Krall \n
-        Created On: 02/06/2025 \n
-        :param stock_ticker:
-        :return:
+        :return: returns dataframe of random stock info
         """
-        today = datetime.today()
-        yesterday = today - datetime.timedelta(days=2) # cant be on weekends
-        stock_data = yf.download(stock_ticker, start=yesterday, end=today, multi_level_index=False, actions=True)
-        close_price = stock_data.loc[yesterday.strftime('%Y-%m-%d'),'Close']
+        stock_info_df = pd.DataFrame()
+        current_stocks = sorted(set(self.stock_prices_df['Stock Ticker']))
+        for s in current_stocks:
+            s_info_df = self.get_stock_ticker_info(s)
+            stock_info_df = stock_info_df._append(s_info_df, ignore_index=True)
 
-        return close_price
+        return stock_info_df
 
     def get_stock_ticker_info(self, stock_ticker: str):
         """
@@ -397,7 +409,7 @@ class StockData(ReportData):
         ticker = yf.Ticker(stock_ticker)
 
         long_name = None
-        inception_date = None
+        inception_dt = datetime(year=1900, month=1, day=1)
         category = None
         fund_family = None
 
@@ -406,7 +418,8 @@ class StockData(ReportData):
             inception_date = ticker.info['fundInceptionDate']
             inception_date = datetime.utcfromtimestamp(inception_date)
             inception_date = inception_date.date()
-            inception_date = inception_date.strftime('%Y-%m-%d')
+            inception_date_str = inception_date.strftime('%Y-%m-%d')
+            inception_dt = datetime.fromisoformat(inception_date_str)
         if 'category' in ticker.info: category = ticker.info['category']
         if 'fundFamily' in ticker.info: fund_family = ticker.info['fundFamily']
 
@@ -426,27 +439,71 @@ class StockData(ReportData):
             if stock_ticker == 'FFOLX': category = 'Target Date Blend'
 
         # calc the expense ration
-        total_assets = None
-        total_costs = None
-        expense_ratio = None
-        if 'totalAssets' in ticker.info: total_assets = ticker.info['totalAssets']
-        if 'totalCosts' in ticker.info: total_costs = ticker.info['totalCosts']
-        if total_assets is not None and total_costs is not None:
-            expense_ratio = total_costs / total_assets
+        # total_assets = None
+        # if 'totalAssets' in ticker.info: total_assets = ticker.info['totalAssets']
+
+        # test = ticker.info.keys()
+        current_stock_price, current_reporting_date = self.get_stock_current_price(stock_ticker)
+        inception_price = get_stock_inception_price(stock_ticker)
+        previous_close_price = ticker.info['previousClose']
+        current_reporting_dt_str = current_reporting_date.strftime('%Y-%m-%d')
+        current_reporting_dt = datetime.fromisoformat(current_reporting_dt_str)
+
+        if stock_ticker == 'FFOLX': cagr = 0.08 #issue with this stock getting a crazy high CAGR
+        else:
+            cagr = get_stock_cagr(
+                inception_date=inception_dt,
+                last_reported_date=current_reporting_dt,
+                inception_price=inception_price,
+                current_price=previous_close_price
+            )
 
         stats = {
-            'Stock': [stock_ticker],
-            'Long Name': [long_name],
-            'Inception Date': [inception_date],
-            'Category': [category],
-            'Fund Family': [fund_family],
-            'Total Assets': [total_assets],
-            'Total Costs': [total_costs],
-            'Expense Ratio': [expense_ratio],
+            'Stock': stock_ticker,
+            'Long Name': long_name,
+            'Category': category,
+            'Fund Family': fund_family,
+            'Inception Date': inception_dt,
+            'Inception Price': inception_price,
+            'Last Reported Date': current_reporting_dt,
+            'Previous Close Price': previous_close_price,
+            'Current Stock Price': current_stock_price,
+            'Compound Annual Growth Rate (CAGR)': cagr
         }
-        stats_df = pd.DataFrame(stats)
+        stats_df = pd.DataFrame([stats])
         return stats_df
 
+    def get_stock_current_price(self, stock_ticker: str, day_period: int = 2):
+        """
+        Purpose: Returns the current stock price at close \n
+        Created By: Robert Krall \n
+        Created On: 02/06/2025 \n
+
+        :param stock_ticker: The Stock ticker
+        :type stock_ticker: str
+
+        :param day_period:  how many days to look at data. (some stocks are updated in 1 day others are more than 1 day)
+        :type day_period: int
+
+        :return: Current Stock Price (close_price) and Last Reported Ddate (current_reporting_date)
+        """
+        print(f"Looking up {stock_ticker} current price.")
+        ticker = yf.Ticker(stock_ticker)
+        if ticker is not None:
+            hist_data = ticker.history(period=f'{day_period}d')
+            if not hist_data.empty:
+                close_price = hist_data['Close'].iloc[0]
+                current_reporting_date = hist_data.index[-1]
+                return close_price, current_reporting_date
+            else:
+                # Checking for data in the next 5 days and return 0 if there was no data in teh past 5 days
+                if day_period == 5:
+                    return 0, '1900-01-01'
+                else:
+                    close_price,current_reporting_date = self.get_stock_current_price(stock_ticker, day_period=day_period + 1)
+                    return close_price, current_reporting_date
+        else:
+            return 0, '1900-01-01'
 
     def get_future_retirement_balance(self, contributions_df, future_years: int = 20):
         """
@@ -454,6 +511,7 @@ class StockData(ReportData):
         Created By: Robert Krall \n
         Created On: 02/08/2025 \n
 
+        :param contributions_df:
         :param future_years: Number of years in the future
         :type future_years: int
 
@@ -464,187 +522,101 @@ class StockData(ReportData):
         years = list(range(current_year, current_year + (future_years+1)))
         years_df = pd.DataFrame({'Year': years})
 
-        # Getting Rate of Return per stock ticker
-        current_stocks_df = self.stock_prices_df[
-            ['Company', 'Employer', 'Owner', 'Type', 'Sub Type', 'Stock Ticker', 'Shares', 'Weighted Average']]
-        stocks = sorted(set(current_stocks_df['Stock Ticker'].to_list()))
+        # get stock info
+        ror_df = self.stock_info_df[['Stock', 'Compound Annual Growth Rate (CAGR)','Current Stock Price']]
+        ror_df.rename(columns={'Compound Annual Growth Rate (CAGR)':'cagr'},inplace=True)
 
-        ror_df = self.get_historic_ror(stocks)
-        ror_df['ROR (8%)'] = .08
-        ror_df['Current Stock Price'] = ror_df.apply(
-            lambda row: self.get_current_stock_price(stock_ticker=row['Stock Ticker']), axis=1)
+        # current Stocks per plan
+        current_stocks_df = self.stock_prices_df[['Company', 'Employer', 'Owner', 'Type', 'Sub Type', 'Stock Ticker', 'Weighted Average', 'Shares']]
+        current_stocks_df.rename(columns={'Stock Ticker': 'Stock'}, inplace=True)
 
+        # for the joining of dataframes (cross join hack)
         ror_df['key'] = 1
         years_df['key'] = 1
-        # Calc the future pricing
-        # Using weighted averages and what tickers are currently being purchased.
+
         future_pricing = pd.merge(years_df, ror_df, on='key').drop('key', axis=1)
-        # default future stock price
-        future_pricing['Future Stock Price (30 yr ROR)'] = 0.0
-        future_pricing['Future Stock Price (8% ROR)'] = 0.0
-        temp_pricing = future_pricing.copy()
-        future_pricing.set_index(['Year', 'Stock Ticker'], inplace=True)
-
-        # Iterate over each stock ticker ( I think we can write this better in the future)
-        for stock in temp_pricing['Stock Ticker'].unique():
-            # Get the rows for the specific stock
-            stock_rows = temp_pricing[temp_pricing['Stock Ticker'] == stock]
-
-            # Iterate over each year for the specific stock
-            for i in range(len(stock_rows)):
-                thirty_year_ror = stock_rows.loc[stock_rows.index[i], 'ROR (30 Years)']
-                baseline_ror = stock_rows.loc[stock_rows.index[i], 'ROR (8%)']
-
-                if i == 0:
-                    # For the current year, calculate Future Stock Price using Current Stock Price
-                    stock_rows.loc[stock_rows.index[i], 'Future Stock Price (30 yr ROR)'] = stock_rows.loc[
-                                                                                                stock_rows.index[
-                                                                                                    i], 'Current Stock Price'] * (
-                                                                                                        1 + thirty_year_ror)
-
-                    stock_rows.loc[stock_rows.index[i], 'Future Stock Price (8% ROR)'] = stock_rows.loc[stock_rows.index[
-                        i], 'Current Stock Price'] * (1 + baseline_ror)
-
-                else:
-                    # For future years, calculate Future Stock Price using previous Future Stock Price
-                    stock_rows.loc[stock_rows.index[i], 'Future Stock Price (30 yr ROR)'] = stock_rows.loc[
-                                                                                                stock_rows.index[
-                                                                                                    i - 1], 'Future Stock Price (30 yr ROR)'] * (
-                                                                                                        1 + thirty_year_ror)
-
-                    stock_rows.loc[stock_rows.index[i], 'Future Stock Price (8% ROR)'] = stock_rows.loc[stock_rows.index[
-                        i - 1], 'Future Stock Price (8% ROR)'] * (1 + baseline_ror)
-            # update dataframe
-            stock_rows.set_index(['Year', 'Stock Ticker'], inplace=True)
-            future_pricing.update(stock_rows)
-
-        # remove index
-        future_pricing.reset_index(inplace=True)
-        future_pricing = pd.merge(future_pricing, current_stocks_df, on=['Stock Ticker'], how="left")
-
-        future_pricing = pd.merge(future_pricing, contributions_df,
-                                  on=['Company', 'Employer', 'Owner', 'Type', 'Sub Type'], how="left")
+        future_pricing = pd.merge(future_pricing, current_stocks_df, on=['Stock'], how="left")
+        future_pricing = pd.merge(future_pricing, contributions_df, on=['Company', 'Employer', 'Owner', 'Type', 'Sub Type'], how="left")
         future_pricing['Yearly Contributions'] = future_pricing['Weighted Average'] * future_pricing['Contributions']
+        future_pricing = future_pricing.drop('Contributions', axis=1)
 
-        # Trimming columns I want
-        future_pricing = future_pricing[[
-            'Year', 'Company', 'Employer', 'Owner', 'Type', 'Sub Type', 'Stock Ticker', 'Yearly Contributions',
-            'Shares', 'Future Stock Price (30 yr ROR)', 'Future Stock Price (8% ROR)'
-        ]]
+        # figure out future pricing and stocks well buy
+        future_pricing['Future Stock Price (CAGR)'] = future_pricing.apply(lambda row: calc_stock_future_price(row, 'cagr'), axis=1)
+        future_pricing['Future Stock Price (8%)'] = future_pricing.apply(lambda row: calc_stock_future_price(row, '8%'), axis=1)
 
-        # calc the 10 yr, 20 yr, 8% shares that will be bought each year
-        future_pricing['30 yr shares'] = future_pricing['Yearly Contributions'] / future_pricing[
-            'Future Stock Price (30 yr ROR)']
-        future_pricing['8% shares'] = future_pricing['Yearly Contributions'] / future_pricing[
-            'Future Stock Price (8% ROR)']
+        future_pricing['CAGR Shares'] = 0.0
+        future_pricing['8% Shares'] = 0.0
+        future_pricing['CAGR Value'] = 0.0
+        future_pricing['8% Value'] = 0.0
 
-        future_pricing['30 yr shares over time'] = 0
-        future_pricing['8% shares over time'] = 0
+        # Calc how many new shares I will be buying
+        future_pricing.loc[~pd.isna(future_pricing['Yearly Contributions']), 'CAGR Shares'] = future_pricing['Yearly Contributions'] / future_pricing['Future Stock Price (CAGR)']
+        future_pricing.loc[~pd.isna(future_pricing['Yearly Contributions']), '8% Shares'] = future_pricing['Yearly Contributions'] / future_pricing['Future Stock Price (8%)']
 
-        future_pricing.fillna(0, inplace=True)
+        # removing columns no longer needed
+        future_pricing = future_pricing.drop('cagr', axis=1)
+        future_pricing = future_pricing.drop('Current Stock Price', axis=1)
+        future_pricing = future_pricing.drop('Weighted Average', axis=1)
+
+        buying_shares_df = future_pricing[~pd.isna(future_pricing['Yearly Contributions'])][['Company','Employer','Owner','Type','Sub Type', 'Year', 'Stock', 'Shares', 'CAGR Shares','8% Shares']]
+        buying_shares_df['Yearly CAGR Shares'] = 0.0
+        buying_shares_df['Yearly 8% Shares'] = 0.0
 
         # getting the shares over time.
-        for index, row in future_pricing.iterrows():
+        for index, row in buying_shares_df.iterrows():
             # PK
             company = row['Company']
             employer = row['Employer']
             owner = row['Owner']
             type = row['Type']
             sub_type = row['Sub Type']
-            stock_ticker = row['Stock Ticker']
+            stock_ticker = row['Stock']
 
             # New Shares
-            thirty_yr_shares = row['30 yr shares']
-            eight_percentage_shares = row['8% shares']
+            cagr_shares = row['CAGR Shares']
+            eight_percentage_shares = row['8% Shares']
 
             base_stock_filter = (
-                    (future_pricing['Company'] == company) &
-                    (future_pricing['Employer'] == employer) &
-                    (future_pricing['Owner'] == owner) &
-                    (future_pricing['Type'] == type) &
-                    (future_pricing['Sub Type'] == sub_type) &
-                    (future_pricing['Stock Ticker'] == stock_ticker)
+                    (buying_shares_df['Company'] == company) &
+                    (buying_shares_df['Employer'] == employer) &
+                    (buying_shares_df['Owner'] == owner) &
+                    (buying_shares_df['Type'] == type) &
+                    (buying_shares_df['Sub Type'] == sub_type) &
+                    (buying_shares_df['Stock'] == stock_ticker)
             )
 
             if row['Year'] == current_year:
-                stock_filter = base_stock_filter & (future_pricing['Year'] == row['Year'])
+                stock_filter = base_stock_filter & (buying_shares_df['Year'] == row['Year'])
 
-                thirty_yr_shares += future_pricing.loc[stock_filter, 'Shares'].iloc[0]
-                eight_percentage_shares += future_pricing.loc[stock_filter, 'Shares'].iloc[0]
+                cagr_shares += buying_shares_df.loc[stock_filter, 'Shares'].iloc[0]
+                eight_percentage_shares += buying_shares_df.loc[stock_filter, 'Shares'].iloc[0]
             else:
-                stock_filter = base_stock_filter & (
-                            future_pricing['Year'] == row['Year'] - 1)  # Grab Last year data to populate
-                thirty_yr_shares += future_pricing.loc[stock_filter, '30 yr shares over time'].iloc[0]
-                eight_percentage_shares += future_pricing.loc[stock_filter, '8% shares over time'].iloc[0]
-                stock_filter = base_stock_filter & (future_pricing['Year'] == row['Year'])  # populate current year data
+                stock_filter = base_stock_filter & (buying_shares_df['Year'] == row['Year'] - 1)  # Grab Last year data to populate
+                cagr_shares += buying_shares_df.loc[stock_filter, 'Yearly CAGR Shares'].iloc[0]
+                eight_percentage_shares += buying_shares_df.loc[stock_filter, 'Yearly 8% Shares'].iloc[0]
+                stock_filter = base_stock_filter & (buying_shares_df['Year'] == row['Year'])  # populate current year data
 
             # update rows in DF
-            future_pricing.loc[stock_filter, '30 yr shares over time'] = thirty_yr_shares
-            future_pricing.loc[stock_filter, '8% shares over time'] = eight_percentage_shares
+            buying_shares_df.loc[stock_filter, 'Yearly CAGR Shares'] = cagr_shares
+            buying_shares_df.loc[stock_filter, 'Yearly 8% Shares'] = eight_percentage_shares
 
-        # Calcing future Value
-        future_pricing['30 avg ror balance'] = future_pricing['Future Stock Price (30 yr ROR)'] * future_pricing[
-            '30 yr shares over time']
-        future_pricing['8% ror balance'] = future_pricing['Future Stock Price (8% ROR)'] * future_pricing[
-            '8% shares over time']
-
-        retirement_balances = future_pricing.groupby('Year').agg(
-            Thirty_Year_Average_RoR_Balance=('30 avg ror balance', sum),
-            Eight_Percentage_RoR_Balance=('8% ror balance', sum)
+        # join back to main df
+        buying_shares_df = buying_shares_df.drop('Shares', axis=1)
+        buying_shares_df = buying_shares_df.drop('CAGR Shares', axis=1)
+        buying_shares_df = buying_shares_df.drop('8% Shares', axis=1)
+        final_future_pricing = future_pricing.merge(buying_shares_df, on=['Company','Employer','Owner','Type','Sub Type', 'Year', 'Stock'], how='left')
+        final_future_pricing.loc[pd.isna(final_future_pricing['Yearly CAGR Shares']), 'Yearly CAGR Shares'] = future_pricing['Shares']
+        final_future_pricing.loc[pd.isna(final_future_pricing['Yearly 8% Shares']), 'Yearly 8% Shares'] = future_pricing['Shares']
+        # Find the Future Value
+        final_future_pricing['Yearly CAGR Value'] = final_future_pricing['Yearly CAGR Shares'] * final_future_pricing['Future Stock Price (CAGR)']
+        final_future_pricing['Yearly 8% Value'] = final_future_pricing['Yearly 8% Shares'] * final_future_pricing['Future Stock Price (8%)']
+        retirement_balances = final_future_pricing.groupby('Year').agg(
+            CAGR_Balance=('Yearly CAGR Value', sum),
+            Eight_Percentage_Balance=('Yearly 8% Value', sum)
         ).reset_index()
+        retirement_balances.rename(columns={'CAGR_Balance': 'Yearly CAGR Value'}, inplace=True)
+        retirement_balances.rename(columns={'Eight_Percentage_Balance': 'Yearly 8% Value'}, inplace=True)
+        retirement_balances['Yearly CAGR Value (Todays Dollars)'] = retirement_balances.apply(lambda row: get_inflation_balance(row, 'cagr'), axis=1)
+        retirement_balances['Yearly 8% Value (Todays Dollars)'] = retirement_balances.apply(lambda row: get_inflation_balance(row, None), axis=1)
 
-        return retirement_balances
-
-    def get_historic_ror(self, stocks: list):
-        """
-        Purpose: This function will pass the average 10, 20, 30 year ROR per stock in a list \n
-        Created By: Robert Krall \n
-        Created On: 02/06/2025 \n
-
-        :param stocks: List of stock tickers
-        :return:  dataframe of stocks and historic Rate of Returns (30 year time frame)
-        """
-
-        stock_ror_df = pd.DataFrame(columns=['Stock Ticker', 'ROR (30 Years)'])
-
-        for s in stocks:
-            ror_30_years = self.get_average_annual_return(s, 30)
-
-            data = [{
-                'Stock Ticker': s,
-                'ROR (30 Years)': ror_30_years
-            }]
-            stock_ror_df = stock_ror_df._append(data, ignore_index=True)
-
-        return stock_ror_df
-
-    def get_average_annual_return(self,portfolio_tickers, years: int = 10):
-        """
-        Purpose: Calculates the average annual rate of return for a portfolio of index funds using the yfinance API.
-        Created BY: Robert Krall \n
-        Created On: 02/09/2025
-
-        Args:
-          portfolio_tickers: A list of tickers for the index funds in the portfolio.
-          years: how many years you want the average rate of return to be calculated for.
-
-        Returns:
-          The real average rate of return per ticker.  The real average takes in account inflation per the time range you are looking up
-        """
-
-        # Get historical prices for each index fund.
-        ticker = yf.Ticker(portfolio_tickers)
-        hist_data = ticker.history(period=f'{years}y')
-
-        # calc hte average yearly rate of return
-        returns = hist_data['Close'].pct_change().dropna()
-        average_yearly_return = returns.mean() * 252  # Adjusting for 252 trading days in a year
-
-        # want to get the real inflation number instead of using 3% in the future. Well use the CPI Index calc
-        inflation = 0.03
-        real_rate = ((1 + average_yearly_return) / (1 + inflation)) - 1
-
-        stats = self.get_stock_ticker_info(portfolio_tickers)
-        print(stats)
-
-        return real_rate
+        return retirement_balances  

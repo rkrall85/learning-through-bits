@@ -24,9 +24,12 @@ employer_colors = {
 }
 
 retirement_type_colors = {
-        '401k': 'green',
-        'HSA': 'blue',
-        'Roth IRA': 'brown',
+        'Traditional - 401k': 'royalblue',
+        'Traditional - IRA': 'dodgerblue',
+        'Roth - 401k': 'green',
+        'Roth - IRA': 'seagreen',
+        'HSA': 'brown',
+        'Employee Stock Plan': 'orange',
         'Post': 'blue',
         'Pre': 'green'
 }
@@ -122,7 +125,7 @@ def yearly_balance_stacked_bar_graph(
         colors = company_colors
     elif 'Employer' in group_by:
         colors = employer_colors
-    elif 'Type' in group_by:
+    elif 'Sub Type' in group_by:
         colors = retirement_type_colors
     else:
         colors = company_colors
@@ -414,10 +417,12 @@ def retirement_progress_bar(current_contributions, contributions_goal, yearly_co
     plt.show()
 
 
-def pie_chart_balance_breakdown(df, by_column: str = 'Type'):
+def pie_chart_balance_breakdown(df, by_column: str = 'Sub Type'):
     """
     Purpose: This function will output a pie chart of the current breakdown of balances
     :param df:
+    :param by_column: the column we want to group by the pie by
+    :type by_column: str
     :return:
     """
 
