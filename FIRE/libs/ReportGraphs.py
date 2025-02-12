@@ -4,35 +4,60 @@ import numpy as np
 import locale
 
 
-company_colors = {
-        'Associated Bank': 'green',
-        'Charles Schwab': 'orange',
-        'Fidelity': 'blue',
-        'John Hancock': 'purple',
-        'M1': 'brown',
-        'Vanguard': 'pink'
+color_dict = {
+    # Employer
+    #'Associated Bank': 'green',
+    'SwineTech': 'pink',
+    'Rocket Software': 'purple',
+    'Farm Credit': '#228B22',
+    'Personal': 'brown',
+    #'Vanguard': 'orange',
+    'UHS': '#016667',
+    # Companies
+    'Associated Bank': 'green',
+    'Charles Schwab': 'orange',
+    'Fidelity': 'blue',
+    'John Hancock': 'purple',
+    'M1': 'royalblue',
+    'Vanguard': '#B22222',
+    # fund Family
+    'ARK': 'green',
+    'Invesco': 'orange',
+    #'Fidelity': 'blue',
+    #'Vanguard': 'pink',
+    # fund category
+    'Technology': 'green',
+    'Small': 'orange',
+    'Mid-Cap': 'red',
+    'Large Growth': 'seagreen',
+    'Large Blend': 'royalblue',
+    'Foreign Large Blend': 'dodgerblue',
+    # Retirement Type
+    'Traditional - 401k': 'royalblue',
+    'Traditional - IRA': 'dodgerblue',
+    'Roth - 401k': 'green',
+    'Roth - IRA': 'seagreen',
+    'HSA': 'brown',
+    'Employee Stock Plan': 'orange',
+    'Post': 'blue',
+    'Pre': 'green',
+    # Stock Tickers
+    'VTI': '#F08080',
+    'VO':'#FA8072',
+    'VXUS':'#B22222',
+    'FXAIX': 'blue',
+    'FTEC': 'royalblue',
+    'FSMDX': 'dodgerblue',
+    'FSSNX': '#4682B4',
+    'QQQ': 'green'
 }
 
-employer_colors = {
-        'Associated Bank': 'green',
-        'SwineTech': 'pink',
-        'Rocket Software': 'blue',
-        'Farm Credit': 'purple',
-        'Personal': 'brown',
-        'Vanguard': 'orange',
-        'UHS': '#016667'
-}
 
-retirement_type_colors = {
-        'Traditional - 401k': 'royalblue',
-        'Traditional - IRA': 'dodgerblue',
-        'Roth - 401k': 'green',
-        'Roth - IRA': 'seagreen',
-        'HSA': 'brown',
-        'Employee Stock Plan': 'orange',
-        'Post': 'blue',
-        'Pre': 'green'
-}
+def get_color(t):
+    for key in color_dict:
+        if t in key:
+            return color_dict[key]
+    return 'gray'
 
 
 def yearly_balance_bar_graph_with_predictions(df, selected_years, title, future_years_count):
@@ -119,20 +144,10 @@ def yearly_balance_stacked_bar_graph(
     grouped = selected_data.groupby(group_by)[money_type].sum().unstack().fillna(0)
 
     bottoms = np.zeros(len(selected_years))
-    colors = ['blue', 'orange', 'green', 'red', 'purple', 'brown']  # Add more colors if needed
-
-    if 'Company' in group_by:
-        colors = company_colors
-    elif 'Employer' in group_by:
-        colors = employer_colors
-    elif 'Sub Type' in group_by:
-        colors = retirement_type_colors
-    else:
-        colors = company_colors
 
     for i, g in enumerate(grouped.columns):
         balances = grouped[g].values
-        color = colors.get(g, 'gray') # colors[i % len(colors)]
+        color = color_dict.get(g, 'gray') # colors[i % len(colors)]
         plt.bar(indices, balances, width, bottom=bottoms, color=color, label=g)
 
         # Add labels
@@ -417,20 +432,38 @@ def retirement_progress_bar(current_contributions, contributions_goal, yearly_co
     plt.show()
 
 
-def pie_chart_balance_breakdown(df, by_column: str = 'Sub Type'):
+def pie_chart_balance_breakdown(df, by_column: str = 'Sub Type', max_slices: int = 5):
     """
     Purpose: This function will output a pie chart of the current breakdown of balances
     :param df:
     :param by_column: the column we want to group by the pie by
+    :param max_slices: number of slices in a pie
+
     :type by_column: str
+    :type max_slices: int
+
     :return:
     """
-
     # Data for the pie chart
     labels = df[by_column]
     sizes = df['Balances']
-    colors = [retirement_type_colors[t] for t in df[by_column]]
-    explode = [0.1] + [0] * (len(df) - 1)  # Dynamic explode list
+    colors = [get_color(t) for t in df[by_column]]
+
+    # If the number of slices exceeds max_slices, combine the smaller slices into "Others"
+    if len(sizes) > max_slices:
+        # Sort the slices by size
+        sorted_indices = sizes.argsort()[::-1]
+        labels = labels[sorted_indices]
+        sizes = sizes[sorted_indices]
+        colors = [colors[i] for i in sorted_indices]
+
+        # Combine the smaller slices into "Others"
+        combined_size = sizes[max_slices - 1:].sum()
+        labels = list(labels[:max_slices - 1]) + ['Others']
+        sizes = list(sizes[:max_slices - 1]) + [combined_size]
+        colors = colors[:max_slices - 1] + ['gray']
+
+    explode = [0.1] + [0] * (len(sizes) - 1)  # Dynamic explode list
 
     # Create the pie chart with custom percentage text color
     wedges, texts, autotexts = plt.pie(
@@ -449,7 +482,6 @@ def pie_chart_balance_breakdown(df, by_column: str = 'Sub Type'):
     plt.title(f'Current Retirement Balance Breakdown by {by_column}')
 
     # Display the pie chart
-    plt.show()
 
 
 def bar_chart_contributions_left(

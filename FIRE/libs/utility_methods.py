@@ -67,3 +67,25 @@ def get_inflation_balance(row, flag ='cagr'):
     future_value = principal * amount
 
     return future_value
+
+
+def format_money(x):
+    """
+    Purpose: Format the dataframe column to be in the correct format when outputting it in money \n
+    Created By: Robert Krall \n
+    Created On: 02/12/2025 \n
+    :param x:
+    :return:
+    """
+    return "${:,.2f}".format(x)
+
+
+def format_percentage(x):
+    """
+    Purpose: This function will format the % field in a dataframe \n
+    Created By: Robert Krall \n
+    Created On: 02/12/2025 \n
+    :param x:
+    :return:
+    """
+    return "{:.2%}".format(x)

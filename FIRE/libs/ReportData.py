@@ -409,11 +409,13 @@ class StockData(ReportData):
         ticker = yf.Ticker(stock_ticker)
 
         long_name = None
+        short_name = None
         inception_dt = datetime(year=1900, month=1, day=1)
         category = None
         fund_family = None
 
         if 'longName' in ticker.info: long_name = ticker.info['longName']
+        if 'shortName' in ticker.info: short_name = ticker.info['shortName']
         if 'fundInceptionDate' in ticker.info:
             inception_date = ticker.info['fundInceptionDate']
             inception_date = datetime.utcfromtimestamp(inception_date)
@@ -427,6 +429,8 @@ class StockData(ReportData):
         if fund_family is None:
             if 'Fidelity' in long_name: fund_family = 'Fidelity'
             if 'Vanguard' in long_name: fund_family = 'Vanguard'
+        if fund_family == 'Fidelity Investments':
+            fund_family = 'Fidelity'
         if category is None:
             if 'Mid Cap' in long_name: category = 'Mid-Cap Blend'
             if 'Small Cap' in long_name: category = 'Small Blend'
@@ -460,7 +464,8 @@ class StockData(ReportData):
 
         stats = {
             'Stock': stock_ticker,
-            'Long Name': long_name,
+            #'Long Name': long_name,
+            'Short Name': short_name,
             'Category': category,
             'Fund Family': fund_family,
             'Inception Date': inception_dt,
@@ -523,11 +528,11 @@ class StockData(ReportData):
         years_df = pd.DataFrame({'Year': years})
 
         # get stock info
-        ror_df = self.stock_info_df[['Stock', 'Compound Annual Growth Rate (CAGR)','Current Stock Price']]
+        ror_df = self.stock_info_df[['Stock', 'Compound Annual Growth Rate (CAGR)','Current Stock Price']].copy()
         ror_df.rename(columns={'Compound Annual Growth Rate (CAGR)':'cagr'},inplace=True)
 
         # current Stocks per plan
-        current_stocks_df = self.stock_prices_df[['Company', 'Employer', 'Owner', 'Type', 'Sub Type', 'Stock Ticker', 'Weighted Average', 'Shares']]
+        current_stocks_df = self.stock_prices_df[['Company', 'Employer', 'Owner', 'Type', 'Sub Type', 'Stock Ticker', 'Weighted Average', 'Shares']].copy()
         current_stocks_df.rename(columns={'Stock Ticker': 'Stock'}, inplace=True)
 
         # for the joining of dataframes (cross join hack)
@@ -611,12 +616,19 @@ class StockData(ReportData):
         final_future_pricing['Yearly CAGR Value'] = final_future_pricing['Yearly CAGR Shares'] * final_future_pricing['Future Stock Price (CAGR)']
         final_future_pricing['Yearly 8% Value'] = final_future_pricing['Yearly 8% Shares'] * final_future_pricing['Future Stock Price (8%)']
         retirement_balances = final_future_pricing.groupby('Year').agg(
-            CAGR_Balance=('Yearly CAGR Value', sum),
-            Eight_Percentage_Balance=('Yearly 8% Value', sum)
+            CAGR_Balance=('Yearly CAGR Value', 'sum'),
+            Eight_Percentage_Balance=('Yearly 8% Value', 'sum')
         ).reset_index()
-        retirement_balances.rename(columns={'CAGR_Balance': 'Yearly CAGR Value'}, inplace=True)
-        retirement_balances.rename(columns={'Eight_Percentage_Balance': 'Yearly 8% Value'}, inplace=True)
-        retirement_balances['Yearly CAGR Value (Todays Dollars)'] = retirement_balances.apply(lambda row: get_inflation_balance(row, 'cagr'), axis=1)
-        retirement_balances['Yearly 8% Value (Todays Dollars)'] = retirement_balances.apply(lambda row: get_inflation_balance(row, None), axis=1)
+        retirement_balances_final = retirement_balances.copy()
+        retirement_balances_final.rename(columns={'CAGR_Balance': 'Yearly CAGR Value'}, inplace=True)
+        retirement_balances_final.rename(columns={'Eight_Percentage_Balance': 'Yearly 8% Value'}, inplace=True)
+        retirement_balances_final['Yearly CAGR Value (Todays Dollars)'] = retirement_balances_final.apply(lambda row: get_inflation_balance(row, 'cagr'), axis=1)
+        retirement_balances_final['Yearly 8% Value (Todays Dollars)'] = retirement_balances_final.apply(lambda row: get_inflation_balance(row, None), axis=1)
 
-        return retirement_balances  
+        retirement_balances_format = retirement_balances_final.copy()
+        retirement_balances_format['Yearly CAGR Value'] = retirement_balances_format['Yearly CAGR Value'].apply(format_money)
+        retirement_balances_format['Yearly 8% Value'] = retirement_balances_format['Yearly 8% Value'].apply(format_money)
+        retirement_balances_format['Yearly CAGR Value (Todays Dollars)'] = retirement_balances_format['Yearly CAGR Value (Todays Dollars)'].apply(format_money)
+        retirement_balances_format['Yearly 8% Value (Todays Dollars)'] = retirement_balances_format['Yearly 8% Value (Todays Dollars)'].apply(format_money)
+
+        return retirement_balances_final, retirement_balances_format
