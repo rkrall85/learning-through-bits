@@ -75,6 +75,7 @@ class ReportData:
             self.balances_df = pd.read_excel(source_path, sheet_name="Balances")
             self.contributions_limits_df = pd.read_excel(source_path, sheet_name="Contributions Limits")
             self.stock_prices_df = pd.read_excel(source_path, sheet_name="Stocks")
+            self.goals_df = pd.read_excel(source_path, sheet_name="Goals")
             self.cpi_df = pd.read_excel(source_path, sheet_name="CPI")
 
             self.current_year = self.balances_df['Year'].max()
@@ -361,6 +362,17 @@ class ReportData:
         '''
         return current_contributions, contributions_goal, yearly_contributions, previous_contributions, previous_yearly_contributions
 
+    def get_fidelity_retirement_goal(self, years_in_future: int = 5):
+        """
+        Purpose: This function will grab the fidelity retirement numbers \n
+        Created By: Robert Krall \n
+        :return:
+        """
+
+        fidelity_goals_filter_df = self.goals_df[(self.goals_df['Year'] >= self.current_year) & (self.goals_df['Year'] <= self.current_year + years_in_future)]
+        fidelity_goals_df = fidelity_goals_filter_df[['Year','Fidelity 401k Goal', 'Retirement']]
+        return fidelity_goals_df
+
 
 class StockData(ReportData):
     def __init__(
@@ -510,15 +522,15 @@ class StockData(ReportData):
         else:
             return 0, '1900-01-01'
 
-    def get_future_retirement_balance(self, contributions_df, future_years: int = 20):
+    def get_future_retirement_balance(self, contributions_df, future_years: int = 20, cagr_flag: str = 'cagr'):
         """
         Purpose: This function will predict future value of retirement balance using various methods. \n
         Created By: Robert Krall \n
         Created On: 02/08/2025 \n
 
         :param contributions_df:
-        :param future_years: Number of years in the future
-        :type future_years: int
+        :param age: Number of years in the future
+        :type age: int
 
         :return:
         """
@@ -530,6 +542,7 @@ class StockData(ReportData):
         # get stock info
         ror_df = self.stock_info_df[['Stock', 'Compound Annual Growth Rate (CAGR)','Current Stock Price']].copy()
         ror_df.rename(columns={'Compound Annual Growth Rate (CAGR)':'cagr'},inplace=True)
+        ror_df['cagr_average'] = ror_df['cagr'].mean()
 
         # current Stocks per plan
         current_stocks_df = self.stock_prices_df[['Company', 'Employer', 'Owner', 'Type', 'Sub Type', 'Stock Ticker', 'Weighted Average', 'Shares']].copy()
@@ -546,8 +559,8 @@ class StockData(ReportData):
         future_pricing = future_pricing.drop('Contributions', axis=1)
 
         # figure out future pricing and stocks well buy
-        future_pricing['Future Stock Price (CAGR)'] = future_pricing.apply(lambda row: calc_stock_future_price(row, 'cagr'), axis=1)
-        future_pricing['Future Stock Price (8%)'] = future_pricing.apply(lambda row: calc_stock_future_price(row, '8%'), axis=1)
+        future_pricing['Future Stock Price (CAGR)'] = future_pricing.apply(lambda row: calc_stock_future_price(row, cagr_flag), axis=1)
+        future_pricing['Future Stock Price (8%)'] = future_pricing.apply(lambda row: calc_stock_future_price(row, None), axis=1) #default to 8% in function
 
         future_pricing['CAGR Shares'] = 0.0
         future_pricing['8% Shares'] = 0.0
@@ -560,6 +573,7 @@ class StockData(ReportData):
 
         # removing columns no longer needed
         future_pricing = future_pricing.drop('cagr', axis=1)
+        future_pricing = future_pricing.drop('cagr_average', axis=1)
         future_pricing = future_pricing.drop('Current Stock Price', axis=1)
         future_pricing = future_pricing.drop('Weighted Average', axis=1)
 
@@ -590,7 +604,7 @@ class StockData(ReportData):
                     (buying_shares_df['Stock'] == stock_ticker)
             )
 
-            if row['Year'] == current_year:
+            if row['Year'] == self.current_year:
                 stock_filter = base_stock_filter & (buying_shares_df['Year'] == row['Year'])
 
                 cagr_shares += buying_shares_df.loc[stock_filter, 'Shares'].iloc[0]
@@ -609,12 +623,13 @@ class StockData(ReportData):
         buying_shares_df = buying_shares_df.drop('Shares', axis=1)
         buying_shares_df = buying_shares_df.drop('CAGR Shares', axis=1)
         buying_shares_df = buying_shares_df.drop('8% Shares', axis=1)
-        final_future_pricing = future_pricing.merge(buying_shares_df, on=['Company','Employer','Owner','Type','Sub Type', 'Year', 'Stock'], how='left')
+        final_future_pricing = pd.merge(future_pricing, buying_shares_df, on=['Company','Employer','Owner','Type','Sub Type', 'Year', 'Stock'], how='left')
         final_future_pricing.loc[pd.isna(final_future_pricing['Yearly CAGR Shares']), 'Yearly CAGR Shares'] = future_pricing['Shares']
         final_future_pricing.loc[pd.isna(final_future_pricing['Yearly 8% Shares']), 'Yearly 8% Shares'] = future_pricing['Shares']
         # Find the Future Value
         final_future_pricing['Yearly CAGR Value'] = final_future_pricing['Yearly CAGR Shares'] * final_future_pricing['Future Stock Price (CAGR)']
         final_future_pricing['Yearly 8% Value'] = final_future_pricing['Yearly 8% Shares'] * final_future_pricing['Future Stock Price (8%)']
+
         retirement_balances = final_future_pricing.groupby('Year').agg(
             CAGR_Balance=('Yearly CAGR Value', 'sum'),
             Eight_Percentage_Balance=('Yearly 8% Value', 'sum')
@@ -632,3 +647,61 @@ class StockData(ReportData):
         retirement_balances_format['Yearly 8% Value (Todays Dollars)'] = retirement_balances_format['Yearly 8% Value (Todays Dollars)'].apply(format_money)
 
         return retirement_balances_final, retirement_balances_format
+
+    def get_retirement_projections(self, contributions_df, age: int = 20, cagr_flag: str = 'cagr', todays_dollar_flag: bool = False):
+        """
+        Purpose: This function will get the data needed for the retirement projection graph \n
+        Created By: Robert Krall \n
+        Created On: 02/14/2025 \n
+        :param contributions_df:
+        :param age:
+        :param cagr_flag:
+        :param todays_dollar_flag:
+        :return:
+        """
+        birth_date = datetime(year=1985, month=5, day=12)
+        year_turns_age = birth_date.year + age
+        years_in_future = int(year_turns_age - self.current_year)
+
+        retirement_balances, retirement_balances_format = self.get_future_retirement_balance(contributions_df, years_in_future, cagr_flag)
+        print(retirement_balances_format)
+        fidelity_goals_filter_df = self.goals_df[(self.goals_df['Year'] >= self.current_year - 5) & (self.goals_df['Year'] <= self.current_year + years_in_future)]
+        fidelity_goals_filter_df = fidelity_goals_filter_df.copy()
+        fidelity_goals_filter_df.replace(0.0, np.nan, inplace=True)
+        fidelity_goals_df = fidelity_goals_filter_df[['Year','Fidelity 401k Goal', 'Retirement']]
+
+        retirement_balances = pd.merge(fidelity_goals_df, retirement_balances, on=['Year'], how="left")
+        # Create a complete list of years
+        all_years = pd.DataFrame({'Year': range(retirement_balances['Year'].min(), retirement_balances['Year'].max() + 1)})
+        # Merge the original data frame with the complete list of years
+        retirement_balances = pd.merge(all_years, retirement_balances, on='Year', how='left')
+        # Making sure all the lines are linear so the report looks better
+        retirement_balances['Fidelity 401k Goal'] = retirement_balances['Fidelity 401k Goal'].interpolate(method='linear')
+        retirement_balances['Yearly CAGR Value'] = retirement_balances['Yearly CAGR Value'].interpolate(method='linear')
+        retirement_balances['Yearly 8% Value'] = retirement_balances['Yearly 8% Value'].interpolate(method='linear')
+        retirement_balances['Yearly CAGR Value (Todays Dollars)'] = retirement_balances['Yearly CAGR Value (Todays Dollars)'].interpolate(method='linear')
+        retirement_balances['Yearly 8% Value (Todays Dollars)'] = retirement_balances['Yearly 8% Value (Todays Dollars)'].interpolate(method='linear')
+
+        # Creating various markers
+        retirement_balances['Milestone'] = np.nan
+        milestones = [1e6, 2e6, 3e6, 4e6, 5e6, 6e6, 7e7, 8e8]
+        ages = [40, 45, 50, 55, 60, 65, 70]
+
+        # Milestone markers (1M - 8M
+        for milestone in milestones:
+            surpass = retirement_balances['Fidelity 401k Goal'] >= milestone
+            if surpass.any():
+                first_index = surpass.idxmax()
+                retirement_balances.loc[first_index, 'Milestone'] = retirement_balances.loc[first_index, 'Fidelity 401k Goal']
+
+        retirement_balances['Age'] = retirement_balances['Year'] - 1985
+        retirement_balances['Age Milestone'] = np.nan
+
+        # Function to mark the first occurrence of surpassing each age milestone
+        for age in ages:
+            surpass = retirement_balances['Age'] >= age
+            if surpass.any():
+                first_index = surpass.idxmax()
+                retirement_balances.loc[first_index, 'Age Milestone'] = retirement_balances.loc[first_index, 'Age']
+
+        return retirement_balances

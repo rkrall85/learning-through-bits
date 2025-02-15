@@ -2,6 +2,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import locale
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+from matplotlib.ticker import FuncFormatter
 
 
 color_dict = {
@@ -27,8 +32,8 @@ color_dict = {
     #'Vanguard': 'pink',
     # fund category
     'Technology': 'green',
-    'Small': 'orange',
-    'Mid-Cap': 'red',
+    'Small Blend': 'orange',
+    'Mid-Cap Blend': 'red',
     'Large Growth': 'seagreen',
     'Large Blend': 'royalblue',
     'Foreign Large Blend': 'dodgerblue',
@@ -58,6 +63,15 @@ def get_color(t):
         if t in key:
             return color_dict[key]
     return 'gray'
+
+
+def currency_format(x, pos):
+    if x >= 1e6:
+        return '${:,.0f}M'.format(x * 1e-6)
+    elif x >= 1e3:
+        return '${:,.0f}K'.format(x * 1e-3)
+    else:
+        return '${:,.0f}'.format(x)
 
 
 def yearly_balance_bar_graph_with_predictions(df, selected_years, title, future_years_count):
@@ -543,4 +557,73 @@ def bar_chart_contributions_left(
     ax.legend(unique_handles, unique_labels)
 
     # Display the graph
+    plt.show()
+
+
+def retirement_projection_graph(
+    retirement_balances_df,
+
+):
+    # Plotting
+    df = retirement_balances_df.copy()
+
+    fig, ax1 = plt.subplots(figsize=(12, 6))
+
+    ax1.set_title('Predicting Retirement Future Value with CAGR Calc')
+
+    yearly_cagr = df['Yearly CAGR Value']
+    yearly_eight = df['Yearly 8% Value']
+    fidelity_value = df['Fidelity 401k Goal']
+    retirement_value = df['Retirement']
+
+    # Primary axis
+    ax1.plot(df['Year'], yearly_cagr, color='blue', linestyle=":", label='Yearly CAGR')
+    ax1.plot(df['Year'], yearly_eight, color='blue', linestyle=":", label='Yearly 8%')
+    ax1.plot(df['Year'], fidelity_value, color='red', linestyle="--", label='Yearly Fidelity Retirement Goal')
+    ax1.plot(df['Year'], retirement_value, color='green', linestyle="--", label='Yearly Retirement Statement')
+    ax1.fill_between(df['Year'], yearly_eight, yearly_cagr, color='navy', alpha=0.1)
+    ax1.fill_between(df['Year'], df['Fidelity 401k Goal'], df['Yearly CAGR Value'],
+                     where=df['Fidelity 401k Goal'] > df['Yearly CAGR Value'], color='red', alpha=0.2)
+    ax1.fill_between(df['Year'], df['Fidelity 401k Goal'], df['Yearly CAGR Value'],
+                     where=df['Fidelity 401k Goal'] <= df['Yearly CAGR Value'], color='green', alpha=0.2)
+
+    goal_markers = df.loc[~pd.isna(df['Milestone']), ['Year', 'Milestone']]
+    ax1.scatter(goal_markers['Year'], goal_markers['Milestone'], marker='^', color='orange',
+                label='Millionaire Milestones', s=100)
+
+    formatter = FuncFormatter(currency_format)
+    ax1.yaxis.set_major_formatter(formatter)
+
+    for i, row in goal_markers.iterrows():
+        milestone = row['Milestone']
+        if milestone:
+            formatted_text = currency_format(milestone, None)
+            ax1.annotate(formatted_text, (row['Year'], milestone), textcoords="offset points", xytext=(0, 10),
+                         ha='center')
+
+    # Secondary axis for Age Milestones
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Age')
+
+    age_markers = df.loc[~pd.isna(df['Age Milestone']), ['Year', 'Age Milestone']]
+    ax2.scatter(age_markers['Year'], age_markers['Age Milestone'], marker='o', color='purple', label='Age Milestones',
+                s=100)
+
+    for i, row in age_markers.iterrows():
+        age_milestone = row['Age Milestone']
+        if not pd.isna(age_milestone):
+            ax2.annotate(f'Age {int(age_milestone)}', (row['Year'], age_milestone), textcoords="offset points",
+                         xytext=(0, 10), ha='center')
+
+    ax1.set_ylabel('Balance')
+    ax1.set_xlabel('Date')
+    ax1.set_xticks(df['Year'][::5])
+    ax1.set_xticklabels(df['Year'][::5], rotation=0)
+
+    # Combine legends from both axes
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines + lines2, labels + labels2, loc='upper left')
+
+    plt.tight_layout()
     plt.show()

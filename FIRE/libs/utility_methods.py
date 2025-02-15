@@ -32,10 +32,10 @@ def get_stock_inception_price(stock_ticker: str):
     return open_price
 
 
-def calc_stock_future_price(row, percentage_flag):
+def calc_stock_future_price(row, percentage_flag: str = None):
 
-    if percentage_flag == 'cagr':
-        rate = row['cagr']
+    if percentage_flag is not None:
+        rate = row[f'{percentage_flag}']
     else:
         rate = 0.08
 
@@ -45,7 +45,8 @@ def calc_stock_future_price(row, percentage_flag):
     principal = row['Current Stock Price']
 
     # Calculate the compound interest
-    amount = principal * (1 + rate) ** (1 * years)
+    #amount = principal * (1 + rate) ** (1 * years)
+    amount = principal * (1 + rate) ** years
 
     # Calculate the interest earned
     #interest = amount - principal
