@@ -8,7 +8,11 @@ import os
 import pandas as pd
 from openpyxl import load_workbook
 import shutil
+import yfinance as yf
 import datetime
+import numpy as np
+from datetime import datetime, timedelta
+from utility_methods import *
 
 
 class ReportData:
@@ -24,6 +28,8 @@ class ReportData:
 
         self.balances_df = None
         self.contributions_limits_df = None
+        self.stock_prices_df = None
+        self.stock_info_df = None
 
         # used for filtering data
         self.current_year = None
@@ -68,11 +74,14 @@ class ReportData:
         else:
             self.balances_df = pd.read_excel(source_path, sheet_name="Balances")
             self.contributions_limits_df = pd.read_excel(source_path, sheet_name="Contributions Limits")
+            self.stock_prices_df = pd.read_excel(source_path, sheet_name="Stocks")
+            self.goals_df = pd.read_excel(source_path, sheet_name="Goals")
+            self.cpi_df = pd.read_excel(source_path, sheet_name="CPI")
 
             self.current_year = self.balances_df['Year'].max()
             self.previous_year = self.current_year - 1
 
-            current_date = datetime.datetime.now()
+            current_date = datetime.today()
             self.current_quarter = (current_date.month - 1) // 3 + 1
 
             self.year_list = self.balances_df['Year'].drop_duplicates().sort_values(ascending=False).to_list()
@@ -137,7 +146,12 @@ class ReportData:
         :return: dataframe of values
         """
 
-        bal_df = self.balances_df[self.balances_df['Type'] == account_type]
+        if account_type == '401k': sub_type = 'Traditional - 401k'
+        elif account_type == 'HSA': sub_type = 'HSA'
+        elif account_type == 'Roth IRA': sub_type = 'Roth - IRA'
+        else: sub_type = 'Traditional - 401k'
+
+        bal_df = self.balances_df[self.balances_df['Sub Type'] == sub_type]
         con_df = self.contributions_limits_df[self.contributions_limits_df['Type'] == account_type][['Year','Employee Limit']]
 
         yearly_contributions = bal_df.groupby(['Year', 'Owner']).agg(
@@ -183,23 +197,21 @@ class ReportData:
         if quarter is None:
             quarter = self.current_quarter
 
+        if type =='401k':
+            flag_filter = (self.balances_df['401k Flag'] == True)
+        elif type =='HSA':
+            flag_filter = (self.balances_df['HSA Flag'] == True)
+        else:
+            flag_filter = (self.balances_df['401k Flag'] == True) # default to 401k
 
         # getting contributions
-        yearly_bal_df = self.balances_df[
-            (self.balances_df['Type'] == type) &
-            ((self.balances_df['Year'] == year) |
-             (self.balances_df['Year'] == previous_year))
-            ]
-        current_ytq_df = self.balances_df[
-            (self.balances_df['Type'] == type) &
-            (self.balances_df['Year'] == year) &
-            (self.balances_df['Quarter'] <= quarter)
-        ]
-        previous_ytq_df = self.balances_df[
-            (self.balances_df['Type'] == type) &
-            (self.balances_df['Year'] == previous_year) &
-            (self.balances_df['Quarter'] <= quarter)
-        ]
+        yearly_bal_filter = flag_filter & ((self.balances_df['Year'] == year) | (self.balances_df['Year'] == previous_year))
+        current_ytq_filter = flag_filter & (self.balances_df['Year'] == year) & (self.balances_df['Quarter'] <= quarter)
+        previous_ytq_filter = flag_filter & (self.balances_df['Year'] == previous_year) & (self.balances_df['Quarter'] <= quarter)
+
+        yearly_bal_df = self.balances_df[yearly_bal_filter]
+        current_ytq_df = self.balances_df[current_ytq_filter]
+        previous_ytq_df = self.balances_df[previous_ytq_filter]
 
         # Apply the dynamic filter for person_Var if it's not None
         if owner is not None:
@@ -350,32 +362,346 @@ class ReportData:
         '''
         return current_contributions, contributions_goal, yearly_contributions, previous_contributions, previous_yearly_contributions
 
+    def get_fidelity_retirement_goal(self, years_in_future: int = 5):
+        """
+        Purpose: This function will grab the fidelity retirement numbers \n
+        Created By: Robert Krall \n
+        :return:
+        """
+
+        fidelity_goals_filter_df = self.goals_df[(self.goals_df['Year'] >= self.current_year) & (self.goals_df['Year'] <= self.current_year + years_in_future)]
+        fidelity_goals_df = fidelity_goals_filter_df[['Year','Fidelity 401k Goal', 'Retirement']]
+        return fidelity_goals_df
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-'''
-class Reports(ReportData):
+class StockData(ReportData):
     def __init__(
             self,
             file_name: str = "FIRE_tracker",
             copy_file: bool = False,
-            use_copied_file: bool = False
+            use_copied_file: bool = False,
+            get_stock_info: bool = True
     ):
-         super().__init__(
-             file_name,
-             copy_file,
-             use_copied_file
-         )
-'''
+        super().__init__(
+            file_name,
+            copy_file,
+            use_copied_file
+        )
+        if get_stock_info:
+            self.stock_info_df = self._get_investment_stock_info()
+        else:
+            self.stock_info_df = None
+
+    def _get_investment_stock_info(self):
+        """
+        Purpose: This function will grab al the current investment info we need  \n
+        Created On: 02/10/2025 \n
+        Created By: Robert Krall \n
+        :return: returns dataframe of random stock info
+        """
+        stock_info_df = pd.DataFrame()
+        current_stocks = sorted(set(self.stock_prices_df['Stock Ticker']))
+        for s in current_stocks:
+            s_info_df = self.get_stock_ticker_info(s)
+            stock_info_df = stock_info_df._append(s_info_df, ignore_index=True)
+
+        return stock_info_df
+
+    def get_stock_ticker_info(self, stock_ticker: str):
+        """
+        Purpose: This function will return various info about the stock. \n
+        Created On: 02/09/2025 \n
+        Created By: Robert Krall
+        :param stock_ticker: a Stock Ticker such as MMM
+        :type stock_ticker: str
+        :return: a dictionary of values
+        :rtype dict
+        """
+
+        ticker = yf.Ticker(stock_ticker)
+
+        long_name = None
+        short_name = None
+        inception_dt = datetime(year=1900, month=1, day=1)
+        category = None
+        fund_family = None
+
+        if 'longName' in ticker.info: long_name = ticker.info['longName']
+        if 'shortName' in ticker.info: short_name = ticker.info['shortName']
+        if 'fundInceptionDate' in ticker.info:
+            inception_date = ticker.info['fundInceptionDate']
+            inception_date = datetime.utcfromtimestamp(inception_date)
+            inception_date = inception_date.date()
+            inception_date_str = inception_date.strftime('%Y-%m-%d')
+            inception_dt = datetime.fromisoformat(inception_date_str)
+        if 'category' in ticker.info: category = ticker.info['category']
+        if 'fundFamily' in ticker.info: fund_family = ticker.info['fundFamily']
+
+        # updating category / fund family if its missing
+        if fund_family is None:
+            if 'Fidelity' in long_name: fund_family = 'Fidelity'
+            if 'Vanguard' in long_name: fund_family = 'Vanguard'
+        if fund_family == 'Fidelity Investments':
+            fund_family = 'Fidelity'
+        if category is None:
+            if 'Mid Cap' in long_name: category = 'Mid-Cap Blend'
+            if 'Small Cap' in long_name: category = 'Small Blend'
+            if 'Small Cap' in long_name: category = 'Small Blend'
+            if 'International' in long_name: category = 'Foreign Large Blend'
+            if '500' in long_name: category = 'Large Blend'
+            if stock_ticker == 'FSMAX': category = 'Mid-Cap Blend'
+            if stock_ticker == 'VIIIX': category = 'Large Blend'
+            if stock_ticker == 'VINIX': category = 'Large Blend'
+            if stock_ticker == 'FFOLX': category = 'Target Date Blend'
+
+        # calc the expense ration
+        # total_assets = None
+        # if 'totalAssets' in ticker.info: total_assets = ticker.info['totalAssets']
+
+        # test = ticker.info.keys()
+        current_stock_price, current_reporting_date = self.get_stock_current_price(stock_ticker)
+        inception_price = get_stock_inception_price(stock_ticker)
+        previous_close_price = ticker.info['previousClose']
+        current_reporting_dt_str = current_reporting_date.strftime('%Y-%m-%d')
+        current_reporting_dt = datetime.fromisoformat(current_reporting_dt_str)
+
+        if stock_ticker == 'FFOLX': cagr = 0.08 #issue with this stock getting a crazy high CAGR
+        else:
+            cagr = get_stock_cagr(
+                inception_date=inception_dt,
+                last_reported_date=current_reporting_dt,
+                inception_price=inception_price,
+                current_price=previous_close_price
+            )
+
+        stats = {
+            'Stock': stock_ticker,
+            #'Long Name': long_name,
+            'Short Name': short_name,
+            'Category': category,
+            'Fund Family': fund_family,
+            'Inception Date': inception_dt,
+            'Inception Price': inception_price,
+            'Last Reported Date': current_reporting_dt,
+            'Previous Close Price': previous_close_price,
+            'Current Stock Price': current_stock_price,
+            'Compound Annual Growth Rate (CAGR)': cagr
+        }
+        stats_df = pd.DataFrame([stats])
+        return stats_df
+
+    def get_stock_current_price(self, stock_ticker: str, day_period: int = 2):
+        """
+        Purpose: Returns the current stock price at close \n
+        Created By: Robert Krall \n
+        Created On: 02/06/2025 \n
+
+        :param stock_ticker: The Stock ticker
+        :type stock_ticker: str
+
+        :param day_period:  how many days to look at data. (some stocks are updated in 1 day others are more than 1 day)
+        :type day_period: int
+
+        :return: Current Stock Price (close_price) and Last Reported Ddate (current_reporting_date)
+        """
+        print(f"Looking up {stock_ticker} current price.")
+        ticker = yf.Ticker(stock_ticker)
+        if ticker is not None:
+            hist_data = ticker.history(period=f'{day_period}d')
+            if not hist_data.empty:
+                close_price = hist_data['Close'].iloc[0]
+                current_reporting_date = hist_data.index[-1]
+                return close_price, current_reporting_date
+            else:
+                # Checking for data in the next 5 days and return 0 if there was no data in teh past 5 days
+                if day_period == 5:
+                    return 0, '1900-01-01'
+                else:
+                    close_price,current_reporting_date = self.get_stock_current_price(stock_ticker, day_period=day_period + 1)
+                    return close_price, current_reporting_date
+        else:
+            return 0, '1900-01-01'
+
+    def get_future_retirement_balance(self, contributions_df, future_years: int = 20, cagr_flag: str = 'cagr'):
+        """
+        Purpose: This function will predict future value of retirement balance using various methods. \n
+        Created By: Robert Krall \n
+        Created On: 02/08/2025 \n
+
+        :param contributions_df:
+        :param age: Number of years in the future
+        :type age: int
+
+        :return:
+        """
+
+        current_year = datetime.today().year
+        years = list(range(current_year, current_year + (future_years+1)))
+        years_df = pd.DataFrame({'Year': years})
+
+        # get stock info
+        ror_df = self.stock_info_df[['Stock', 'Compound Annual Growth Rate (CAGR)','Current Stock Price']].copy()
+        ror_df.rename(columns={'Compound Annual Growth Rate (CAGR)':'cagr'},inplace=True)
+        ror_df['cagr_average'] = ror_df['cagr'].mean()
+
+        # current Stocks per plan
+        current_stocks_df = self.stock_prices_df[['Company', 'Employer', 'Owner', 'Type', 'Sub Type', 'Stock Ticker', 'Weighted Average', 'Shares']].copy()
+        current_stocks_df.rename(columns={'Stock Ticker': 'Stock'}, inplace=True)
+
+        # for the joining of dataframes (cross join hack)
+        ror_df['key'] = 1
+        years_df['key'] = 1
+
+        future_pricing = pd.merge(years_df, ror_df, on='key').drop('key', axis=1)
+        future_pricing = pd.merge(future_pricing, current_stocks_df, on=['Stock'], how="left")
+        future_pricing = pd.merge(future_pricing, contributions_df, on=['Company', 'Employer', 'Owner', 'Type', 'Sub Type'], how="left")
+        future_pricing['Yearly Contributions'] = future_pricing['Weighted Average'] * future_pricing['Contributions']
+        future_pricing = future_pricing.drop('Contributions', axis=1)
+
+        # figure out future pricing and stocks well buy
+        future_pricing['Future Stock Price (CAGR)'] = future_pricing.apply(lambda row: calc_stock_future_price(row, cagr_flag), axis=1)
+        future_pricing['Future Stock Price (8%)'] = future_pricing.apply(lambda row: calc_stock_future_price(row, None), axis=1) #default to 8% in function
+
+        future_pricing['CAGR Shares'] = 0.0
+        future_pricing['8% Shares'] = 0.0
+        future_pricing['CAGR Value'] = 0.0
+        future_pricing['8% Value'] = 0.0
+
+        # Calc how many new shares I will be buying
+        future_pricing.loc[~pd.isna(future_pricing['Yearly Contributions']), 'CAGR Shares'] = future_pricing['Yearly Contributions'] / future_pricing['Future Stock Price (CAGR)']
+        future_pricing.loc[~pd.isna(future_pricing['Yearly Contributions']), '8% Shares'] = future_pricing['Yearly Contributions'] / future_pricing['Future Stock Price (8%)']
+
+        # removing columns no longer needed
+        future_pricing = future_pricing.drop('cagr', axis=1)
+        future_pricing = future_pricing.drop('cagr_average', axis=1)
+        future_pricing = future_pricing.drop('Current Stock Price', axis=1)
+        future_pricing = future_pricing.drop('Weighted Average', axis=1)
+
+        buying_shares_df = future_pricing[~pd.isna(future_pricing['Yearly Contributions'])][['Company','Employer','Owner','Type','Sub Type', 'Year', 'Stock', 'Shares', 'CAGR Shares','8% Shares']]
+        buying_shares_df['Yearly CAGR Shares'] = 0.0
+        buying_shares_df['Yearly 8% Shares'] = 0.0
+
+        # getting the shares over time.
+        for index, row in buying_shares_df.iterrows():
+            # PK
+            company = row['Company']
+            employer = row['Employer']
+            owner = row['Owner']
+            type = row['Type']
+            sub_type = row['Sub Type']
+            stock_ticker = row['Stock']
+
+            # New Shares
+            cagr_shares = row['CAGR Shares']
+            eight_percentage_shares = row['8% Shares']
+
+            base_stock_filter = (
+                    (buying_shares_df['Company'] == company) &
+                    (buying_shares_df['Employer'] == employer) &
+                    (buying_shares_df['Owner'] == owner) &
+                    (buying_shares_df['Type'] == type) &
+                    (buying_shares_df['Sub Type'] == sub_type) &
+                    (buying_shares_df['Stock'] == stock_ticker)
+            )
+
+            if row['Year'] == self.current_year:
+                stock_filter = base_stock_filter & (buying_shares_df['Year'] == row['Year'])
+
+                cagr_shares += buying_shares_df.loc[stock_filter, 'Shares'].iloc[0]
+                eight_percentage_shares += buying_shares_df.loc[stock_filter, 'Shares'].iloc[0]
+            else:
+                stock_filter = base_stock_filter & (buying_shares_df['Year'] == row['Year'] - 1)  # Grab Last year data to populate
+                cagr_shares += buying_shares_df.loc[stock_filter, 'Yearly CAGR Shares'].iloc[0]
+                eight_percentage_shares += buying_shares_df.loc[stock_filter, 'Yearly 8% Shares'].iloc[0]
+                stock_filter = base_stock_filter & (buying_shares_df['Year'] == row['Year'])  # populate current year data
+
+            # update rows in DF
+            buying_shares_df.loc[stock_filter, 'Yearly CAGR Shares'] = cagr_shares
+            buying_shares_df.loc[stock_filter, 'Yearly 8% Shares'] = eight_percentage_shares
+
+        # join back to main df
+        buying_shares_df = buying_shares_df.drop('Shares', axis=1)
+        buying_shares_df = buying_shares_df.drop('CAGR Shares', axis=1)
+        buying_shares_df = buying_shares_df.drop('8% Shares', axis=1)
+        final_future_pricing = pd.merge(future_pricing, buying_shares_df, on=['Company','Employer','Owner','Type','Sub Type', 'Year', 'Stock'], how='left')
+        final_future_pricing.loc[pd.isna(final_future_pricing['Yearly CAGR Shares']), 'Yearly CAGR Shares'] = future_pricing['Shares']
+        final_future_pricing.loc[pd.isna(final_future_pricing['Yearly 8% Shares']), 'Yearly 8% Shares'] = future_pricing['Shares']
+        # Find the Future Value
+        final_future_pricing['Yearly CAGR Value'] = final_future_pricing['Yearly CAGR Shares'] * final_future_pricing['Future Stock Price (CAGR)']
+        final_future_pricing['Yearly 8% Value'] = final_future_pricing['Yearly 8% Shares'] * final_future_pricing['Future Stock Price (8%)']
+
+        retirement_balances = final_future_pricing.groupby('Year').agg(
+            CAGR_Balance=('Yearly CAGR Value', 'sum'),
+            Eight_Percentage_Balance=('Yearly 8% Value', 'sum')
+        ).reset_index()
+        retirement_balances_final = retirement_balances.copy()
+        retirement_balances_final.rename(columns={'CAGR_Balance': 'Yearly CAGR Value'}, inplace=True)
+        retirement_balances_final.rename(columns={'Eight_Percentage_Balance': 'Yearly 8% Value'}, inplace=True)
+        retirement_balances_final['Yearly CAGR Value (Todays Dollars)'] = retirement_balances_final.apply(lambda row: get_inflation_balance(row, 'cagr'), axis=1)
+        retirement_balances_final['Yearly 8% Value (Todays Dollars)'] = retirement_balances_final.apply(lambda row: get_inflation_balance(row, None), axis=1)
+
+        retirement_balances_format = retirement_balances_final.copy()
+        retirement_balances_format['Yearly CAGR Value'] = retirement_balances_format['Yearly CAGR Value'].apply(format_money)
+        retirement_balances_format['Yearly 8% Value'] = retirement_balances_format['Yearly 8% Value'].apply(format_money)
+        retirement_balances_format['Yearly CAGR Value (Todays Dollars)'] = retirement_balances_format['Yearly CAGR Value (Todays Dollars)'].apply(format_money)
+        retirement_balances_format['Yearly 8% Value (Todays Dollars)'] = retirement_balances_format['Yearly 8% Value (Todays Dollars)'].apply(format_money)
+
+        return retirement_balances_final, retirement_balances_format
+
+    def get_retirement_projections(self, contributions_df, age: int = 20, cagr_flag: str = 'cagr', todays_dollar_flag: bool = False):
+        """
+        Purpose: This function will get the data needed for the retirement projection graph \n
+        Created By: Robert Krall \n
+        Created On: 02/14/2025 \n
+        :param contributions_df:
+        :param age:
+        :param cagr_flag:
+        :param todays_dollar_flag:
+        :return:
+        """
+        birth_date = datetime(year=1985, month=5, day=12)
+        year_turns_age = birth_date.year + age
+        years_in_future = int(year_turns_age - self.current_year)
+
+        retirement_balances, retirement_balances_format = self.get_future_retirement_balance(contributions_df, years_in_future, cagr_flag)
+        print(retirement_balances_format)
+        fidelity_goals_filter_df = self.goals_df[(self.goals_df['Year'] >= self.current_year - 5) & (self.goals_df['Year'] <= self.current_year + years_in_future)]
+        fidelity_goals_filter_df = fidelity_goals_filter_df.copy()
+        fidelity_goals_filter_df.replace(0.0, np.nan, inplace=True)
+        fidelity_goals_df = fidelity_goals_filter_df[['Year','Fidelity 401k Goal', 'Retirement']]
+
+        retirement_balances = pd.merge(fidelity_goals_df, retirement_balances, on=['Year'], how="left")
+        # Create a complete list of years
+        all_years = pd.DataFrame({'Year': range(retirement_balances['Year'].min(), retirement_balances['Year'].max() + 1)})
+        # Merge the original data frame with the complete list of years
+        retirement_balances = pd.merge(all_years, retirement_balances, on='Year', how='left')
+        # Making sure all the lines are linear so the report looks better
+        retirement_balances['Fidelity 401k Goal'] = retirement_balances['Fidelity 401k Goal'].interpolate(method='linear')
+        retirement_balances['Yearly CAGR Value'] = retirement_balances['Yearly CAGR Value'].interpolate(method='linear')
+        retirement_balances['Yearly 8% Value'] = retirement_balances['Yearly 8% Value'].interpolate(method='linear')
+        retirement_balances['Yearly CAGR Value (Todays Dollars)'] = retirement_balances['Yearly CAGR Value (Todays Dollars)'].interpolate(method='linear')
+        retirement_balances['Yearly 8% Value (Todays Dollars)'] = retirement_balances['Yearly 8% Value (Todays Dollars)'].interpolate(method='linear')
+
+        # Creating various markers
+        retirement_balances['Milestone'] = np.nan
+        milestones = [1e6, 2e6, 3e6, 4e6, 5e6, 6e6, 7e7, 8e8]
+        ages = [40, 45, 50, 55, 60, 65, 70]
+
+        # Milestone markers (1M - 8M
+        for milestone in milestones:
+            surpass = retirement_balances['Fidelity 401k Goal'] >= milestone
+            if surpass.any():
+                first_index = surpass.idxmax()
+                retirement_balances.loc[first_index, 'Milestone'] = retirement_balances.loc[first_index, 'Fidelity 401k Goal']
+
+        retirement_balances['Age'] = retirement_balances['Year'] - 1985
+        retirement_balances['Age Milestone'] = np.nan
+
+        # Function to mark the first occurrence of surpassing each age milestone
+        for age in ages:
+            surpass = retirement_balances['Age'] >= age
+            if surpass.any():
+                first_index = surpass.idxmax()
+                retirement_balances.loc[first_index, 'Age Milestone'] = retirement_balances.loc[first_index, 'Age']
+
+        return retirement_balances
