@@ -2,9 +2,12 @@ import pandas as pd
 import os
 import shutil
 from datetime import datetime, timedelta
+import math
 
 if os.name == "nt":
-    from travel.common_functions import *
+    from travel.common_functions.report_functions import *
+    from travel.common_functions.column_names import *
+    from travel.common_functions.pricing_list import *
 
 
 def get_env_vars(copy_file=False):
@@ -18,25 +21,26 @@ def get_env_vars(copy_file=False):
         if copy_file: shutil.copy(source_path, destination_path);
         return {
             "cruise_data": pd.read_excel(destination_path, sheet_name="cruise_data"),
-            "cpi": pd.read_excel(destination_path, sheet_name="CPI Index")
+            "cpi": pd.read_excel(destination_path, sheet_name="CPI Index"),
+            "ship_data": pd.read_excel(destination_path, sheet_name="ship_data")
         }
     else:
         return {
             "cruise_data": pd.DataFrame(xl("cruise_data")),
-            "cpi": pd.DataFrame(xl("CPI"))
+            "cpi": pd.DataFrame(xl("CPI")),
+            "ship_data": pd.DataFrame(xl("ship_data"))
         }
 
 
-def get_report_params():
+def get_report_params(ship_data_df):
     if os.name == "nt":
-        return {
+        report_params = {
             'Itinerary Category': 'Caribbean - Eastern',
             'Port': 'Galveston',
             'Number of Ports': 4,
             'Use CPI Index': True,
 
             'Ship': 'Dream',
-            'Class': 'Dream',
 
             'Room Type': 'Balcony',
             'Room Classification': 'Balcony',
@@ -53,14 +57,13 @@ def get_report_params():
             'Travelers': 4
         }
     else:
-        return {
+        report_params = {
             'Itinerary Category': xl("'Pricing Report'!B1"),
             'Port': xl("'Pricing Report'!B2"),
             'Number of Ports': xl("'Pricing Report'!B3"),
             'Use CPI Index':  xl("'Pricing Report'!B4"),
 
             'Ship': xl("'Pricing Report'!D1"),
-            'Class': xl("'Pricing Report'!D2"),
 
             'Room Type': xl("'Pricing Report'!F1"),
             'Room Classification': xl("'Pricing Report'!F2"),
@@ -76,6 +79,21 @@ def get_report_params():
             'Days': xl("'Pricing Report'!J2"),
             'Travelers':  xl("'Pricing Report'!J3")
         }
+
+    #getting other parms
+    ship_df = ship_data_df[ship_data_df['Ship'] == report_params['Ship']]
+
+    ship_class = ship_df['Ship Class'].iloc[0]
+    ship_class_rank = ship_df['Ship Class Rank'].iloc[0]
+    ship_category = ship_df['Size Category'].iloc[0]
+    ship_age_bucket = ship_df['Ship Age Bucket'].iloc[0]
+
+    report_params['Ship Class'] = ship_class
+    report_params['Ship Class Rank'] = ship_class_rank
+    report_params['Size Category'] = ship_category
+    report_params['Age Bucket'] = ship_age_bucket
+
+    return report_params
 
 
 def get_pricing_agg(df, agg):
@@ -119,23 +137,34 @@ def calculate_cost_of_living_index(cpi_df, base_year, base_month):
     return cli
 
 
-copy_file = True
+copy_file = False
 current_date = datetime.now()
-report_params = get_report_params()
+
 tab_data = get_env_vars(copy_file)
 cruise_data = tab_data['cruise_data']
+ship_data = tab_data['ship_data']
 # Column names
 columns_names = get_column_names()
 tab_cruise_data_column_names = columns_names['tab_cruise_data_column_names']
+tab_ship_data_column_names = columns_names['tab_ship_data_column_names']
 # Data Frames
 cruise_data_df = cruise_data.rename(columns=tab_cruise_data_column_names)
+ship_data_df = ship_data.rename(columns=tab_ship_data_column_names)
 cruise_data_df = cruise_data_df[cruise_data_df['Cruise Amount'] != 0]  # remove Robert HS Cruise
+# add some ship status
+cruise_data_df = pd.merge(cruise_data_df, ship_data_df, on="Ship", how="left")
+
 cruise_data_df = cruise_data_df[[
     'Booking #', 'Year', 'Month', 'Ship', 'Itinerary', 'Itinerary Category', 'Port', 'Class',
     'Room Type', 'Room Category', 'Room Classification',
-    'Days', 'Floor',
-    'Daily Person Costs', 'Number of Ports'
+    'Days', 'Floor', 'Cruise Boat Age Bucket',
+    'Daily Person Costs', 'Number of Ports',
+    'Ship Class', 'Ship Class Rank', 'Size Category'
 ]]
+cruise_data_df = cruise_data_df.rename(columns={'Cruise Boat Age Bucket': 'Age Bucket'})
+
+# create the parms
+report_params = get_report_params(ship_data_df)
 
 cpi_index = report_params['Use CPI Index']
 if cpi_index:
@@ -169,11 +198,15 @@ booking_report_df['Mock Booking Label'] = booking_report_df['Mock Booking']
 # Further exclude rows where 'Min', 'Mean', 'Max', and 'Mock Booking' are the same
 # Round values to the nearest dollar
 booking_report_df = booking_report_df.round(0)
-booking_report_df = booking_report_df[
-    ~((booking_report_df['Min'] == booking_report_df['Mean']) &
-      (booking_report_df['Mean'] == booking_report_df['Max']) &
-      (booking_report_df['Max'] == booking_report_df['Mock Booking']))
-]
+# Define the condition for removing records within $10
+condition = (
+        (abs(booking_report_df['Min'] - booking_report_df['Mean']) <= 10) &
+        (abs(booking_report_df['Mean'] - booking_report_df['Max']) <= 10) &
+        (abs(booking_report_df['Max'] - booking_report_df['Mock Booking']) <= 10) &
+        (abs(booking_report_df['Min'] - booking_report_df['Mock Booking']) <= 10)
+)
+# Filter out records that meet the condition
+booking_report_df = booking_report_df[~condition]
 booking_report_df = booking_report_df.reset_index(drop=True)
 booking_report_df.loc[1:, 'Mock Booking Label'] = ""
 booking_report_df

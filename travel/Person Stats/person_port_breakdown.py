@@ -4,7 +4,7 @@ import shutil
 from datetime import datetime
 
 if os.name == "nt":
-    from travel.common_functions import *
+    from common_functions.report_functions import *
 
 
 def get_env_vars(copy_file=False):
